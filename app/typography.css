@@ -1,0 +1,45 @@
+/* Shared type scale: preserve the existing font pair while making text readable. */
+body { font-size: 16px; }
+small, .muted { font-size: 13px; }
+.eyebrow, .hero .eyebrow, .admin-topbar .eyebrow { font-size: 12px; letter-spacing: 1.2px; }
+.button, .button.small, .text-link, .section-heading > .text-link { font-size: 14px; }
+.nav { font-size: 14px; }
+.category-tabs a { font-size: 13px; }
+.product-badge, .article-card small, .photo-note span { font-size: 12px; }
+.price { font-size: 16px; }
+.promise-strip b, .hero-foot, .hero-foot strong { font-size: 13px; }
+.page-heading p, .hero-copy > p, .detail-info > p, .story p, .campaign p,
+.contact-info p, .contact-info > a, .collection-card p, .panel p,
+.empty p, .success > p, .prose p, .article-card p { font-size: 16px; line-height: 1.7; }
+.detail-notes, .detail-notes p, details p, .stock, .breadcrumb, .result-count { font-size: 14px; }
+footer p, .footer-grid > div > a:not(.brand), .footer-grid h3 { font-size: 14px; }
+.footer-note, .footer-bottom { font-size: 13px; }
+label, .radio-card, .summary-line, .summary-line b, .checkout-item,
+.checkout-item > b, .totals > div, .cart-line strong, .cart-line b { font-size: 14px; }
+.radio-card small, .summary-line small, .checkout-item p, .cart-line small,
+.bank-details small, .fine-print, .secure-note { font-size: 13px !important; }
+input, textarea, select, .asset-field input, .inline-form input,
+.inline-form select, .coupon input, .catalog-toolbar select, .search-input input { font-size: 16px; }
+.notice, .success-message, .error, .toast { font-size: 14px !important; }
+.admin-sidebar nav button, .admin-user, .admin-user a, .admin-welcome p,
+.launch-checklist, .order-detail > summary, .order-body p,
+.table-product b, .table-wrap .text-link, .sticky-actions .text-link { font-size: 14px; }
+.admin-user small, .admin-welcome span, .stat small, .stat span, th,
+.table-product small, .order-detail small, .admin-content-grid small,
+.audit-list p, .audit-list small, .badge, .upload-button { font-size: 13px; }
+table, td { font-size: 14px; }
+@media (min-width: 901px) and (max-width: 1100px) {
+ .header-inner { gap: 14px; }
+ .nav { gap: 12px; font-size: 12px; }
+ .header-actions { gap: 8px; }
+}
+@media (max-width: 900px) {
+ .nav { font-size: 15px; }
+ .admin-sidebar nav button { font-size: 14px; }
+}
+@media (max-width: 600px) {
+ .page-heading p, .hero-copy > p, .detail-info > p, .story p, .campaign p,
+ .contact-info p, .contact-info > a, .collection-card p, .panel p,
+ .empty p, .success > p, .prose p, .article-card p { font-size: 16px; }
+ .product-badge { max-width: calc(100% - 16px); }
+}
