@@ -1,0 +1,295 @@
+package shop
+
+import (
+	"context"
+	"encoding/json"
+	"github.com/anhtuhd/commoc/backend/migrations"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+)
+
+func testDB(t *testing.T) *App {
+	t.Helper()
+	dsn := os.Getenv("TEST_DATABASE_URL")
+	if dsn == "" {
+		t.Skip("TEST_DATABASE_URL not set; use QA PostgreSQL")
+	}
+	ctx := context.Background()
+	pool, e := pgxpool.New(ctx, dsn)
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Cleanup(pool.Close)
+	if _, e = pool.Exec(ctx, "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"+migrations.SQL); e != nil {
+		t.Fatal(e)
+	}
+	a := &App{DB: &Store{Pool: pool}, Site: "http://localhost:3401", AdminUser: "qa-owner", Mode: "test", AutoMatch: true}
+	if e = a.Initialize(ctx); e != nil {
+		t.Fatal(e)
+	}
+	_, e = a.DB.Update(ctx, false, func(s State, _ pgx.Tx) (any, error) {
+		for k, v := range fixture() {
+			s[k] = v
+		}
+		s["payments"] = Object{"enabled": true, "accountNumber": "123456", "gateway": "MB", "bankBin": "970422"}
+		return nil, nil
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	return a
+}
+func paymentFor(o Object, tid int) Object {
+	return Object{"id": float64(tid), "gateway": "MB", "transactionDate": time.Now().In(time.FixedZone("VN", 25200)).Format("2006-01-02 15:04:05"), "accountNumber": "123456", "subAccount": "", "code": str(o["paymentCode"]), "content": "Thanh toan " + str(o["paymentCode"]), "transferType": "in", "transferAmount": o["total"], "referenceCode": ""}
+}
+func createTestOrder(t *testing.T, a *App) Object {
+	t.Helper()
+	v, e := a.DB.Update(context.Background(), true, func(s State, _ pgx.Tx) (any, error) { return placeOrder(s, orderInput()) })
+	if e != nil {
+		t.Fatal(e)
+	}
+	return obj(v)
+}
+func TestPostgresConcurrentCheckoutAndRollback(t *testing.T) {
+	a := testDB(t)
+	ctx := context.Background()
+	var wg sync.WaitGroup
+	success := make(chan bool, 12)
+	for n := 0; n < 12; n++ {
+		wg.Add(1)
+		go func(n int) {
+			defer wg.Done()
+			b := orderInput()
+			b["key"] = "concurrent-order-" + strings.Repeat("x", n+1)
+			_, e := a.DB.Update(ctx, true, func(s State, _ pgx.Tx) (any, error) { return placeOrder(s, b) })
+			success <- e == nil
+		}(n)
+	}
+	wg.Wait()
+	close(success)
+	count := 0
+	for ok := range success {
+		if ok {
+			count++
+		}
+	}
+	if count != 2 {
+		t.Fatalf("oversold or lost orders: %d", count)
+	}
+	s, e := a.DB.Read(ctx)
+	if e != nil || len(list(s["orders"])) != 2 || num(list(s["products"])[0]["stock"]) != 0 {
+		t.Fatal("inconsistent checkout", e)
+	}
+	_, e = a.DB.Update(ctx, false, func(s State, tx pgx.Tx) (any, error) {
+		s["brand"] = Object{"name": "should rollback"}
+		_, e := tx.Exec(ctx, "INSERT INTO notification_outbox(id,kind,message) VALUES('rollback','test','test')")
+		if e != nil {
+			return nil, e
+		}
+		return nil, fail("forced failure")
+	})
+	if e == nil {
+		t.Fatal("expected error")
+	}
+	s, _ = a.DB.Read(ctx)
+	if obj(s["brand"])["name"] == "should rollback" {
+		t.Fatal("state leaked")
+	}
+	var n int
+	if e = a.DB.Pool.QueryRow(ctx, "SELECT count(*) FROM notification_outbox WHERE id='rollback'").Scan(&n); e != nil || n != 0 {
+		t.Fatal("outbox leaked", e)
+	}
+}
+func TestPostgresSePayReplayConflictAndAtomicity(t *testing.T) {
+	a := testDB(t)
+	ctx := context.Background()
+	o := createTestOrder(t, a)
+	payment := paymentFor(o, 100)
+	raw := encoded(payment)
+	var normalized Object
+	_ = json.Unmarshal(raw, &normalized)
+	payment = normalized
+	var wg sync.WaitGroup
+	errs := make(chan error, 10)
+	for n := 0; n < 10; n++ {
+		wg.Add(1)
+		go func() { defer wg.Done(); _, e := a.receive(ctx, payment); errs <- e }()
+	}
+	wg.Wait()
+	close(errs)
+	for e := range errs {
+		if e != nil {
+			t.Fatal(e)
+		}
+	}
+	s, e := a.DB.Read(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	got := find(s, "orders", "id", str(o["id"]))
+	if got["paymentStatus"] != "paid" || got["status"] != "new" {
+		t.Fatalf("wrong paid state %v", got)
+	}
+	for _, table := range []string{"payment_transactions", "notification_outbox"} {
+		var n int
+		if e = a.DB.Pool.QueryRow(ctx, "SELECT count(*) FROM "+table).Scan(&n); e != nil || n != 1 {
+			t.Fatalf("duplicate %s %d %v", table, n, e)
+		}
+	}
+	payment["transferAmount"] = 1.0
+	v, e := a.receive(ctx, payment)
+	if e != nil || obj(v)["status"] != "conflict" {
+		t.Fatal("changed payload accepted", e)
+	}
+	s, _ = a.DB.Read(ctx)
+	if find(s, "orders", "id", str(o["id"]))["paymentStatus"] != "paid" {
+		t.Fatal("paid overwritten")
+	}
+}
+func TestPostgresPaymentExceptions(t *testing.T) {
+	for _, scenario := range []string{"amount", "account", "gateway", "expired", "out", "ambiguous", "disabled", "subaccount"} {
+		t.Run(scenario, func(t *testing.T) {
+			a := testDB(t)
+			o := createTestOrder(t, a)
+			p := paymentFor(o, 200)
+			expected := "needs_review"
+			switch scenario {
+			case "amount":
+				p["transferAmount"] = 1.0
+			case "account":
+				p["accountNumber"] = "999999"
+			case "gateway":
+				p["gateway"] = "OTHER"
+			case "subaccount":
+				p["subAccount"] = "VA123"
+			case "out":
+				p["transferType"] = "out"
+				expected = "ignored"
+			case "ambiguous":
+				p["content"] = str(p["content"]) + " MVABCDEF123456"
+			case "disabled":
+				a.AutoMatch = false
+			case "expired":
+				_, e := a.DB.Update(context.Background(), false, func(s State, _ pgx.Tx) (any, error) {
+					find(s, "orders", "id", str(o["id"]))["paymentExpiresAt"] = time.Now().Add(-time.Minute).Format(time.RFC3339)
+					return nil, nil
+				})
+				if e != nil {
+					t.Fatal(e)
+				}
+			}
+			v, e := a.receive(context.Background(), p)
+			if e != nil || obj(v)["status"] != expected {
+				t.Fatalf("%v %v", v, e)
+			}
+			s, _ := a.DB.Read(context.Background())
+			if find(s, "orders", "id", str(o["id"]))["paymentStatus"] != "unpaid" {
+				t.Fatal("unexpected payment")
+			}
+		})
+	}
+}
+func TestMigrationPreservesPaidAndSentHistory(t *testing.T) {
+	a := testDB(t)
+	ctx := context.Background()
+	o := createTestOrder(t, a)
+	if _, e := a.receive(ctx, paymentFor(o, 500)); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := a.DB.Pool.Exec(ctx, "UPDATE notification_outbox SET status='sent',sent_at=now()"); e != nil {
+		t.Fatal(e)
+	}
+	s, e := a.DB.Read(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	transactions, e := rowsJSON(ctx, a.DB.Pool, "SELECT row_to_json(t) FROM payment_transactions t")
+	if e != nil {
+		t.Fatal(e)
+	}
+	outbox, e := rowsJSON(ctx, a.DB.Pool, "SELECT row_to_json(t) FROM (SELECT id,transaction_id,kind,message,status,attempts,extract(epoch from retry_at)*1000 retry_at,created_at,sent_at,last_error FROM notification_outbox) t")
+	if e != nil {
+		t.Fatal(e)
+	}
+	path := t.TempDir() + "/snapshot.json"
+	if e = os.WriteFile(path, encoded(Export{State: s, Transactions: transactions, Outbox: outbox, Metrics: []Object{}}), 0600); e != nil {
+		t.Fatal(e)
+	}
+	for i := 0; i < 2; i++ {
+		if e = a.ImportFile(ctx, path); e != nil {
+			t.Fatal(e)
+		}
+	}
+	s, e = a.DB.Read(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if find(s, "orders", "id", str(o["id"]))["paymentStatus"] != "paid" {
+		t.Fatal("paid lost")
+	}
+	var sent int
+	if e = a.DB.Pool.QueryRow(ctx, "SELECT count(*) FROM notification_outbox WHERE status='sent'").Scan(&sent); e != nil || sent != 1 {
+		t.Fatal("sent lost", e)
+	}
+	if _, e = a.receive(ctx, paymentFor(o, 500)); e != nil {
+		t.Fatal(e)
+	}
+	var count int
+	if e = a.DB.Pool.QueryRow(ctx, "SELECT count(*) FROM notification_outbox").Scan(&count); e != nil || count != 1 {
+		t.Fatal("history replayed", e)
+	}
+}
+func TestOutboxRetriesWithoutLosingPayment(t *testing.T) {
+	a := testDB(t)
+	ctx := context.Background()
+	calls := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer qa-bridge-secret" {
+			t.Error("missing bridge authentication")
+		}
+		if r.URL.Path == "/status" {
+			w.Write([]byte(`{"state":"connected"}`))
+			return
+		}
+		calls++
+		if calls == 1 {
+			w.WriteHeader(503)
+			return
+		}
+		w.Write([]byte(`{"ok":true}`))
+	}))
+	defer server.Close()
+	a.BridgeURL = server.URL
+	a.BridgeSecret = "qa-bridge-secret"
+	_, e := a.DB.Update(ctx, false, func(s State, tx pgx.Tx) (any, error) {
+		s["notifications"] = Object{"enabled": true, "phone": "0900000000"}
+		return nil, a.enqueue(ctx, tx, "payment:test", "test", "payment.received", "QA payment")
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = a.Tick(ctx); e != nil {
+		t.Fatal(e)
+	}
+	var status string
+	var attempts int
+	if e = a.DB.Pool.QueryRow(ctx, "SELECT status,attempts FROM notification_outbox WHERE id='payment:test'").Scan(&status, &attempts); e != nil || status != "failed" || attempts != 1 {
+		t.Fatal("failure not retained", status, attempts, e)
+	}
+	if _, e = a.DB.Pool.Exec(ctx, "UPDATE notification_outbox SET retry_at=now() WHERE id='payment:test'"); e != nil {
+		t.Fatal(e)
+	}
+	if e = a.Tick(ctx); e != nil {
+		t.Fatal(e)
+	}
+	if e = a.DB.Pool.QueryRow(ctx, "SELECT status,attempts FROM notification_outbox WHERE id='payment:test'").Scan(&status, &attempts); e != nil || status != "sent" || attempts != 2 {
+		t.Fatal("retry failed", status, attempts, e)
+	}
+}

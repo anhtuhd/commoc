@@ -1,0 +1,227 @@
+{
+  "brand": {
+    "demo": true,
+    "name": "Mộc Vị",
+    "tagline": "THỨC QUÀ TỪ HẠT NẾP",
+    "description": "Một chút hương đồng. Một miền thương nhớ. Những thức quà Việt được chọn bằng sự trân trọng.",
+    "logo": "/logo.svg",
+    "favicon": "/favicon.svg",
+    "shareImage": "/images/hero.webp",
+    "color": "#244C35",
+    "accent": "#A85B36",
+    "phone": "",
+    "email": "",
+    "address": "Hà Nội, Việt Nam",
+    "zalo": "",
+    "facebook": "",
+    "bankName": "",
+    "bankAccount": "",
+    "bankHolder": "",
+    "seoTitle": "Mộc Vị — Thức quà từ hạt nếp",
+    "seoDescription": "Khám phá cốm, bánh và những hộp quà mang hương vị Hà Nội tại Mộc Vị.",
+    "heroTitle": "Gói hương đồng,\ngửi vị thương.",
+    "heroText": "Từ hạt nếp non đến những thức quà thân thuộc. Mộc Vị dành cho bạn một khoảng dịu dàng, đậm đà hương vị Việt.",
+    "heroImage": "/images/hero.webp",
+    "story": "Có những món quà không cần cầu kỳ. Một gói cốm xanh, chén trà ấm, một lời hỏi han — đủ để thấy lòng gần lại. Mộc Vị bắt đầu từ tình yêu dành cho những điều giản dị ấy, và mong mang hương vị Việt đến bàn trà của bạn.",
+    "shippingText": "Bản thử nghiệm phục vụ khu vực Hà Nội. Phí giao hàng và ngưỡng miễn phí hiển thị tại thanh toán. Cửa hàng sẽ liên hệ xác nhận thời gian giao trước khi chuẩn bị đơn.",
+    "returnsText": "Nếu sản phẩm giao không đúng hoặc bị hư hỏng, hãy liên hệ cửa hàng và cung cấp mã đơn, hình ảnh để được hỗ trợ. Điều kiện cụ thể sẽ được cửa hàng cập nhật trước khi mở bán.",
+    "privacyText": "Thông tin nhận hàng chỉ được sử dụng để xử lý đơn và hỗ trợ khách hàng. Liên hệ cửa hàng để yêu cầu chỉnh sửa hoặc xóa thông tin. Chính sách mẫu cần được chủ cửa hàng rà soát trước khi mở bán."
+  },
+  "brandHistory": [],
+  "products": [
+    {
+      "id": "com-tuoi",
+      "name": "Cốm tươi lá sen",
+      "sku": "COM-TUOI",
+      "category": "Cốm & xôi",
+      "price": 120000,
+      "unit": "500g",
+      "image": "/images/hero.webp",
+      "description": "Hương nếp non dịu nhẹ, gói trong sắc xanh mộc mạc. Một thức quà dành cho buổi trà thong thả.",
+      "storage": "Thông tin mẫu. Cửa hàng cần cập nhật thành phần, hạn dùng và điều kiện bảo quản trên bao bì trước khi mở bán.",
+      "stock": 40,
+      "mode": "fixed",
+      "active": true,
+      "featured": true,
+      "collections": [
+        "thuc-qua-ha-noi"
+      ]
+    },
+    {
+      "id": "banh-com",
+      "name": "Bánh cốm đậu xanh",
+      "sku": "BANH-COM",
+      "category": "Bánh truyền thống",
+      "price": 70000,
+      "unit": "Hộp 10 chiếc",
+      "image": "/images/banh-com.webp",
+      "description": "Lớp bánh mềm dẻo ôm nhân đậu xanh bùi. Món quà nhỏ cho những cuộc gặp đầy thương mến.",
+      "storage": "Thông tin mẫu. Cửa hàng cần cập nhật thành phần, hạn dùng và điều kiện bảo quản trên bao bì trước khi mở bán.",
+      "stock": 40,
+      "mode": "fixed",
+      "active": true,
+      "featured": true,
+      "collections": [
+        "thuc-qua-ha-noi"
+      ]
+    },
+    {
+      "id": "xoi-com",
+      "name": "Xôi cốm sen dừa",
+      "sku": "XOI-COM",
+      "category": "Cốm & xôi",
+      "price": 110000,
+      "unit": "500g",
+      "image": "/images/xoi-com.webp",
+      "description": "Cốm xanh, hạt sen và dừa sợi — ba hương vị quen hòa thành món xôi ngọt dịu.",
+      "storage": "Thông tin mẫu. Cửa hàng cần cập nhật thành phần, hạn dùng và điều kiện bảo quản trên bao bì trước khi mở bán.",
+      "stock": 40,
+      "mode": "fixed",
+      "active": true,
+      "featured": true,
+      "collections": [
+        "thuc-qua-ha-noi"
+      ]
+    },
+    {
+      "id": "set-an-yen",
+      "name": "Hộp quà An Yên",
+      "sku": "SET-AN-YEN",
+      "category": "Hộp quà",
+      "price": 290000,
+      "unit": "Hộp quà",
+      "image": "/images/gift.webp",
+      "description": "Một tuyển chọn thức quà cùng lời chúc an yên. Dành tặng người thân, bạn bè và đối tác.",
+      "storage": "Thông tin mẫu. Cửa hàng cần cập nhật thành phần, hạn dùng và điều kiện bảo quản trên bao bì trước khi mở bán.",
+      "stock": 40,
+      "mode": "fixed",
+      "active": true,
+      "featured": true,
+      "collections": [
+        "thuc-qua-ha-noi"
+      ]
+    },
+    {
+      "id": "cha-com",
+      "name": "Chả cốm Hà Nội",
+      "sku": "CHA-COM",
+      "category": "Món ngon từ cốm",
+      "price": 100000,
+      "unit": "500g",
+      "image": "/images/cha-com.webp",
+      "description": "Hạt cốm dẻo trong miếng chả vàng, thêm một chút hương Hà Nội cho bữa cơm nhà.",
+      "storage": "Thông tin mẫu. Cửa hàng cần cập nhật thành phần, hạn dùng và điều kiện bảo quản trên bao bì trước khi mở bán.",
+      "stock": 40,
+      "mode": "fixed",
+      "active": true,
+      "featured": true,
+      "collections": [
+        "thuc-qua-ha-noi"
+      ]
+    },
+    {
+      "id": "com-kho",
+      "name": "Cốm khô mộc",
+      "sku": "COM-KHO",
+      "category": "Cốm & xôi",
+      "price": 90000,
+      "unit": "250g",
+      "image": "/images/hero.webp",
+      "description": "Hạt cốm dành cho những món chè, xôi và món ăn sáng tạo tại nhà.",
+      "storage": "Thông tin mẫu. Cửa hàng cần cập nhật thành phần, hạn dùng và điều kiện bảo quản trên bao bì trước khi mở bán.",
+      "stock": 40,
+      "mode": "fixed",
+      "active": true,
+      "featured": true,
+      "collections": [
+        "thuc-qua-ha-noi"
+      ]
+    },
+    {
+      "id": "qua-doanh-nghiep",
+      "name": "Quà tặng theo yêu cầu",
+      "sku": "QUA-DOANH-NGHIEP",
+      "category": "Hộp quà",
+      "price": 0,
+      "unit": "Theo yêu cầu",
+      "image": "/images/gift.webp",
+      "description": "Chọn thức quà, lời nhắn và cách gói phù hợp với dịp đặc biệt của bạn.",
+      "storage": "Thông tin mẫu. Cửa hàng cần cập nhật thành phần, hạn dùng và điều kiện bảo quản trên bao bì trước khi mở bán.",
+      "stock": 40,
+      "mode": "quote",
+      "active": true,
+      "featured": true,
+      "collections": [
+        "thuc-qua-ha-noi"
+      ]
+    }
+  ],
+  "collections": [
+    {
+      "id": "thuc-qua-ha-noi",
+      "name": "Thức quà Hà Nội",
+      "description": "Những hương vị thân quen, dành cho mọi ngày.",
+      "image": "/images/hero.webp"
+    },
+    {
+      "id": "gui-nguoi-thuong",
+      "name": "Gửi người thương",
+      "description": "Một món quà nhỏ, thay lời muốn nói.",
+      "image": "/images/gift.webp"
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "mua-thu",
+      "title": "Một món quà, nhiều thương mến.",
+      "text": "Khám phá bộ quà dành cho những người bạn trân quý.",
+      "image": "/images/gift.webp",
+      "href": "/san-pham?category=H%E1%BB%99p%20qu%C3%A0",
+      "startsAt": "2026-01-01",
+      "endsAt": "2027-12-31",
+      "active": true
+    }
+  ],
+  "articles": [
+    {
+      "id": "thuong-com",
+      "title": "Chậm một chút, để thưởng vị cốm",
+      "summary": "Một chén trà, một gói cốm và một buổi chiều thảnh thơi.",
+      "body": "Cốm là một thức quà để thưởng thức chậm. Dọn một phần nhỏ ra đĩa, pha một chén trà nhẹ và dành thời gian cảm nhận hương nếp.\n\nHãy tham khảo hướng dẫn bảo quản trên bao bì của từng sản phẩm. Mỗi loại cốm, bánh hoặc món chế biến có điều kiện bảo quản riêng.",
+      "image": "/images/hero.webp",
+      "published": true
+    },
+    {
+      "id": "chon-qua",
+      "title": "Gửi một hộp quà, gửi cả sự quan tâm",
+      "summary": "Những gợi ý nhỏ để món quà thêm ý nghĩa.",
+      "body": "Một món quà đáng nhớ bắt đầu từ người nhận. Chọn hương vị họ yêu thích, thêm một lời nhắn riêng và cân nhắc thời gian giao phù hợp.\n\nVới quà tặng nhiều người, hãy gửi yêu cầu tư vấn để cửa hàng chuẩn bị đúng số lượng và cách đóng gói.",
+      "image": "/images/gift.webp",
+      "published": true
+    }
+  ],
+  "coupons": [
+    {
+      "code": "MOCVI10",
+      "percent": 10,
+      "minimum": 200000,
+      "maxDiscount": 50000,
+      "limit": 100,
+      "used": 0,
+      "endsAt": "2027-12-31",
+      "active": true
+    }
+  ],
+  "orders": [],
+  "inquiries": [],
+  "admins": [],
+  "audit": [],
+  "shipping": {
+    "fee": 30000,
+    "freeFrom": 500000,
+    "regionLabel": "Hà Nội",
+    "enabled": true
+  },
+  "rate": {},
+  "events": []
+}

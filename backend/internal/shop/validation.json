@@ -1,0 +1,2589 @@
+{
+  "article": {
+    "type": "object",
+    "fields": {
+      "id": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^[a-z0-9-]+$"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          }
+        ]
+      },
+      "title": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "summary": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 500
+          }
+        ]
+      },
+      "body": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 20000
+          }
+        ]
+      },
+      "image": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      },
+      "published": {
+        "type": "boolean"
+      }
+    }
+  },
+  "backup": {
+    "type": "object",
+    "fields": {
+      "version": {
+        "type": "literal",
+        "value": 1
+      },
+      "state": {
+        "type": "object",
+        "fields": {
+          "brand": {
+            "type": "object",
+            "fields": {
+              "bankBin": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "regex",
+                    "regex": "^$|^\\d{6}$"
+                  }
+                ],
+                "optional": true
+              },
+              "heroEyebrow": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 120
+                  }
+                ],
+                "optional": true
+              },
+              "heroCta": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 80
+                  }
+                ],
+                "optional": true
+              },
+              "heroCaption": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 200
+                  }
+                ],
+                "optional": true
+              },
+              "heroStamp": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 100
+                  }
+                ],
+                "optional": true
+              },
+              "featuredTitle": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 150
+                  }
+                ],
+                "optional": true
+              },
+              "storyTitle": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 150
+                  }
+                ],
+                "optional": true
+              },
+              "storyImage": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "max",
+                    "value": 2000
+                  }
+                ],
+                "optional": true
+              },
+              "journalTitle": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 150
+                  }
+                ],
+                "optional": true
+              },
+              "benefits": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 500
+                  }
+                ],
+                "optional": true
+              },
+              "business": {
+                "type": "object",
+                "fields": {
+                  "addressConfirmed": {
+                    "type": "boolean"
+                  },
+                  "street": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      },
+                      {
+                        "kind": "max",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  "locality": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      },
+                      {
+                        "kind": "max",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  "region": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      },
+                      {
+                        "kind": "max",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  "postalCode": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      },
+                      {
+                        "kind": "max",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  "country": {
+                    "type": "enum",
+                    "values": [
+                      "",
+                      "VN"
+                    ]
+                  },
+                  "shippingConfirmed": {
+                    "type": "boolean"
+                  },
+                  "handlingMin": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      }
+                    ]
+                  },
+                  "handlingMax": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      }
+                    ]
+                  },
+                  "transitMin": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      }
+                    ]
+                  },
+                  "transitMax": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      }
+                    ]
+                  },
+                  "returnsConfirmed": {
+                    "type": "boolean"
+                  },
+                  "returnCategory": {
+                    "type": "enum",
+                    "values": [
+                      "",
+                      "none",
+                      "finite",
+                      "unlimited"
+                    ]
+                  },
+                  "returnDays": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      }
+                    ]
+                  },
+                  "returnMethod": {
+                    "type": "enum",
+                    "values": [
+                      "",
+                      "mail",
+                      "store"
+                    ]
+                  },
+                  "refundType": {
+                    "type": "enum",
+                    "values": [
+                      "",
+                      "FullRefund",
+                      "ExchangeRefund",
+                      "StoreCreditRefund"
+                    ],
+                    "default": ""
+                  },
+                  "returnFees": {
+                    "type": "enum",
+                    "values": [
+                      "",
+                      "free",
+                      "customer"
+                    ]
+                  }
+                },
+                "optional": true
+              },
+              "demo": {
+                "type": "boolean",
+                "default": true
+              },
+              "name": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 80
+                  },
+                  {
+                    "kind": "min",
+                    "value": 1
+                  }
+                ]
+              },
+              "tagline": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 120
+                  }
+                ]
+              },
+              "description": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 500
+                  }
+                ]
+              },
+              "logo": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "max",
+                    "value": 2000
+                  }
+                ]
+              },
+              "favicon": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "max",
+                    "value": 2000
+                  }
+                ]
+              },
+              "shareImage": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "max",
+                    "value": 2000
+                  }
+                ]
+              },
+              "color": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "regex",
+                    "regex": "^#[a-fA-F0-9]{6}$"
+                  }
+                ]
+              },
+              "accent": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "regex",
+                    "regex": "^#[a-fA-F0-9]{6}$"
+                  }
+                ]
+              },
+              "phone": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 20
+                  }
+                ]
+              },
+              "email": {
+                "type": "union",
+                "options": [
+                  {
+                    "type": "literal",
+                    "value": ""
+                  },
+                  {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "email"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "address": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 300
+                  }
+                ]
+              },
+              "zalo": {
+                "type": "union",
+                "options": [
+                  {
+                    "type": "literal",
+                    "value": ""
+                  },
+                  {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "url"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "facebook": {
+                "type": "union",
+                "options": [
+                  {
+                    "type": "literal",
+                    "value": ""
+                  },
+                  {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "url"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "bankName": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 100
+                  }
+                ]
+              },
+              "bankAccount": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 50
+                  }
+                ]
+              },
+              "bankHolder": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 100
+                  }
+                ]
+              },
+              "seoTitle": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 150
+                  }
+                ]
+              },
+              "seoDescription": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 400
+                  }
+                ]
+              },
+              "heroTitle": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 150
+                  }
+                ]
+              },
+              "heroText": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 500
+                  }
+                ]
+              },
+              "heroImage": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "max",
+                    "value": 2000
+                  }
+                ]
+              },
+              "story": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 5000
+                  }
+                ]
+              },
+              "shippingText": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 5000
+                  }
+                ]
+              },
+              "returnsText": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 5000
+                  }
+                ]
+              },
+              "privacyText": {
+                "type": "string",
+                "checks": [
+                  {
+                    "kind": "trim"
+                  },
+                  {
+                    "kind": "max",
+                    "value": 5000
+                  }
+                ]
+              }
+            }
+          },
+          "products": {
+            "type": "array",
+            "item": {
+              "type": "object",
+              "fields": {
+                "id": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "regex",
+                      "regex": "^[a-z0-9-]+$"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 80
+                    }
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 150
+                    },
+                    {
+                      "kind": "min",
+                      "value": 2
+                    }
+                  ]
+                },
+                "sku": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 80
+                    },
+                    {
+                      "kind": "min",
+                      "value": 1
+                    }
+                  ]
+                },
+                "category": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 80
+                    },
+                    {
+                      "kind": "min",
+                      "value": 1
+                    }
+                  ]
+                },
+                "collections": {
+                  "type": "array",
+                  "item": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      },
+                      {
+                        "kind": "max",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "max": 20
+                },
+                "price": {
+                  "type": "number",
+                  "checks": [
+                    {
+                      "kind": "int"
+                    },
+                    {
+                      "kind": "min",
+                      "value": 0,
+                      "inclusive": true
+                    },
+                    {
+                      "kind": "max",
+                      "value": 100000000,
+                      "inclusive": true
+                    }
+                  ]
+                },
+                "stock": {
+                  "type": "number",
+                  "checks": [
+                    {
+                      "kind": "int"
+                    },
+                    {
+                      "kind": "min",
+                      "value": 0,
+                      "inclusive": true
+                    },
+                    {
+                      "kind": "max",
+                      "value": 100000,
+                      "inclusive": true
+                    }
+                  ]
+                },
+                "unit": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 80
+                    },
+                    {
+                      "kind": "min",
+                      "value": 1
+                    }
+                  ]
+                },
+                "image": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "max",
+                      "value": 2000
+                    }
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 5000
+                    }
+                  ]
+                },
+                "storage": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 3000
+                    }
+                  ]
+                },
+                "mode": {
+                  "type": "enum",
+                  "values": [
+                    "fixed",
+                    "quote"
+                  ]
+                },
+                "active": {
+                  "type": "boolean"
+                },
+                "featured": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "max": 2000
+          },
+          "collections": {
+            "type": "array",
+            "item": {
+              "type": "object",
+              "fields": {
+                "sortOrder": {
+                  "type": "number",
+                  "checks": [
+                    {
+                      "kind": "int"
+                    },
+                    {
+                      "kind": "min",
+                      "value": 0,
+                      "inclusive": true
+                    },
+                    {
+                      "kind": "max",
+                      "value": 9999,
+                      "inclusive": true
+                    }
+                  ],
+                  "default": 0
+                },
+                "id": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "regex",
+                      "regex": "^[a-z0-9-]+$"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 80
+                    }
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 100
+                    },
+                    {
+                      "kind": "min",
+                      "value": 1
+                    }
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 1000
+                    }
+                  ]
+                },
+                "image": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "max",
+                      "value": 2000
+                    }
+                  ]
+                }
+              }
+            },
+            "max": 200
+          },
+          "campaigns": {
+            "type": "array",
+            "item": {
+              "type": "object",
+              "fields": {
+                "mobileImage": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "max",
+                      "value": 2000
+                    }
+                  ],
+                  "default": ""
+                },
+                "id": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 80
+                    },
+                    {
+                      "kind": "min",
+                      "value": 1
+                    }
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 150
+                    },
+                    {
+                      "kind": "min",
+                      "value": 1
+                    }
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 500
+                    }
+                  ]
+                },
+                "image": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "max",
+                      "value": 2000
+                    }
+                  ]
+                },
+                "href": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "max",
+                      "value": 500
+                    },
+                    {
+                      "kind": "regex",
+                      "regex": "^\\/(?!\\/)"
+                    }
+                  ]
+                },
+                "startsAt": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "regex",
+                      "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+                    }
+                  ]
+                },
+                "endsAt": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "regex",
+                      "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+                    }
+                  ]
+                },
+                "active": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "max": 200
+          },
+          "articles": {
+            "type": "array",
+            "item": {
+              "type": "object",
+              "fields": {
+                "id": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "regex",
+                      "regex": "^[a-z0-9-]+$"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 80
+                    }
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 150
+                    },
+                    {
+                      "kind": "min",
+                      "value": 1
+                    }
+                  ]
+                },
+                "summary": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 500
+                    }
+                  ]
+                },
+                "body": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "trim"
+                    },
+                    {
+                      "kind": "max",
+                      "value": 20000
+                    }
+                  ]
+                },
+                "image": {
+                  "type": "string",
+                  "checks": [
+                    {
+                      "kind": "max",
+                      "value": 2000
+                    }
+                  ]
+                },
+                "published": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "max": 500
+          },
+          "shipping": {
+            "type": "object",
+            "fields": {
+              "fee": {
+                "type": "number",
+                "checks": [
+                  {
+                    "kind": "int"
+                  },
+                  {
+                    "kind": "min",
+                    "value": 0,
+                    "inclusive": true
+                  },
+                  {
+                    "kind": "max",
+                    "value": 1000000,
+                    "inclusive": true
+                  }
+                ]
+              },
+              "freeFrom": {
+                "type": "number",
+                "checks": [
+                  {
+                    "kind": "int"
+                  },
+                  {
+                    "kind": "min",
+                    "value": 1,
+                    "inclusive": true
+                  },
+                  {
+                    "kind": "max",
+                    "value": 100000000,
+                    "inclusive": true
+                  }
+                ]
+              },
+              "regionLabel": {
+                "type": "literal",
+                "value": "Hà Nội",
+                "default": "Hà Nội"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "paymentMinutes": {
+                "type": "number",
+                "checks": [
+                  {
+                    "kind": "int"
+                  },
+                  {
+                    "kind": "min",
+                    "value": 15,
+                    "inclusive": true
+                  },
+                  {
+                    "kind": "max",
+                    "value": 1440,
+                    "inclusive": true
+                  }
+                ],
+                "default": 60
+              },
+              "scheduleEnabled": {
+                "type": "boolean",
+                "default": false
+              },
+              "leadHours": {
+                "type": "number",
+                "checks": [
+                  {
+                    "kind": "int"
+                  },
+                  {
+                    "kind": "min",
+                    "value": 1,
+                    "inclusive": true
+                  },
+                  {
+                    "kind": "max",
+                    "value": 168,
+                    "inclusive": true
+                  }
+                ],
+                "default": 4
+              },
+              "maxDays": {
+                "type": "number",
+                "checks": [
+                  {
+                    "kind": "int"
+                  },
+                  {
+                    "kind": "min",
+                    "value": 1,
+                    "inclusive": true
+                  },
+                  {
+                    "kind": "max",
+                    "value": 30,
+                    "inclusive": true
+                  }
+                ],
+                "default": 7
+              },
+              "slots": {
+                "type": "array",
+                "item": {
+                  "type": "object",
+                  "fields": {
+                    "label": {
+                      "type": "string",
+                      "checks": [
+                        {
+                          "kind": "trim"
+                        },
+                        {
+                          "kind": "max",
+                          "value": 80
+                        },
+                        {
+                          "kind": "min",
+                          "value": 1
+                        }
+                      ]
+                    },
+                    "start": {
+                      "type": "string",
+                      "checks": [
+                        {
+                          "kind": "regex",
+                          "regex": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        }
+                      ]
+                    },
+                    "capacity": {
+                      "type": "number",
+                      "checks": [
+                        {
+                          "kind": "int"
+                        },
+                        {
+                          "kind": "min",
+                          "value": 1,
+                          "inclusive": true
+                        },
+                        {
+                          "kind": "max",
+                          "value": 1000,
+                          "inclusive": true
+                        }
+                      ]
+                    }
+                  }
+                },
+                "max": 12,
+                "default": []
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "brand": {
+    "type": "object",
+    "fields": {
+      "bankBin": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^$|^\\d{6}$"
+          }
+        ],
+        "optional": true
+      },
+      "heroEyebrow": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 120
+          }
+        ],
+        "optional": true
+      },
+      "heroCta": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          }
+        ],
+        "optional": true
+      },
+      "heroCaption": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 200
+          }
+        ],
+        "optional": true
+      },
+      "heroStamp": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 100
+          }
+        ],
+        "optional": true
+      },
+      "featuredTitle": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          }
+        ],
+        "optional": true
+      },
+      "storyTitle": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          }
+        ],
+        "optional": true
+      },
+      "storyImage": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ],
+        "optional": true
+      },
+      "journalTitle": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          }
+        ],
+        "optional": true
+      },
+      "benefits": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 500
+          }
+        ],
+        "optional": true
+      },
+      "business": {
+        "type": "object",
+        "fields": {
+          "addressConfirmed": {
+            "type": "boolean"
+          },
+          "street": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              },
+              {
+                "kind": "max",
+                "value": 200
+              }
+            ]
+          },
+          "locality": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              },
+              {
+                "kind": "max",
+                "value": 200
+              }
+            ]
+          },
+          "region": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              },
+              {
+                "kind": "max",
+                "value": 200
+              }
+            ]
+          },
+          "postalCode": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              },
+              {
+                "kind": "max",
+                "value": 200
+              }
+            ]
+          },
+          "country": {
+            "type": "enum",
+            "values": [
+              "",
+              "VN"
+            ]
+          },
+          "shippingConfirmed": {
+            "type": "boolean"
+          },
+          "handlingMin": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              }
+            ]
+          },
+          "handlingMax": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              }
+            ]
+          },
+          "transitMin": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              }
+            ]
+          },
+          "transitMax": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              }
+            ]
+          },
+          "returnsConfirmed": {
+            "type": "boolean"
+          },
+          "returnCategory": {
+            "type": "enum",
+            "values": [
+              "",
+              "none",
+              "finite",
+              "unlimited"
+            ]
+          },
+          "returnDays": {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "trim"
+              }
+            ]
+          },
+          "returnMethod": {
+            "type": "enum",
+            "values": [
+              "",
+              "mail",
+              "store"
+            ]
+          },
+          "refundType": {
+            "type": "enum",
+            "values": [
+              "",
+              "FullRefund",
+              "ExchangeRefund",
+              "StoreCreditRefund"
+            ],
+            "default": ""
+          },
+          "returnFees": {
+            "type": "enum",
+            "values": [
+              "",
+              "free",
+              "customer"
+            ]
+          }
+        },
+        "optional": true
+      },
+      "demo": {
+        "type": "boolean",
+        "default": true
+      },
+      "name": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "tagline": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 120
+          }
+        ]
+      },
+      "description": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 500
+          }
+        ]
+      },
+      "logo": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      },
+      "favicon": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      },
+      "shareImage": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      },
+      "color": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^#[a-fA-F0-9]{6}$"
+          }
+        ]
+      },
+      "accent": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^#[a-fA-F0-9]{6}$"
+          }
+        ]
+      },
+      "phone": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 20
+          }
+        ]
+      },
+      "email": {
+        "type": "union",
+        "options": [
+          {
+            "type": "literal",
+            "value": ""
+          },
+          {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "email"
+              }
+            ]
+          }
+        ]
+      },
+      "address": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 300
+          }
+        ]
+      },
+      "zalo": {
+        "type": "union",
+        "options": [
+          {
+            "type": "literal",
+            "value": ""
+          },
+          {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "url"
+              }
+            ]
+          }
+        ]
+      },
+      "facebook": {
+        "type": "union",
+        "options": [
+          {
+            "type": "literal",
+            "value": ""
+          },
+          {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "url"
+              }
+            ]
+          }
+        ]
+      },
+      "bankName": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 100
+          }
+        ]
+      },
+      "bankAccount": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 50
+          }
+        ]
+      },
+      "bankHolder": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 100
+          }
+        ]
+      },
+      "seoTitle": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          }
+        ]
+      },
+      "seoDescription": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 400
+          }
+        ]
+      },
+      "heroTitle": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          }
+        ]
+      },
+      "heroText": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 500
+          }
+        ]
+      },
+      "heroImage": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      },
+      "story": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 5000
+          }
+        ]
+      },
+      "shippingText": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 5000
+          }
+        ]
+      },
+      "returnsText": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 5000
+          }
+        ]
+      },
+      "privacyText": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 5000
+          }
+        ]
+      }
+    }
+  },
+  "campaign": {
+    "type": "object",
+    "fields": {
+      "mobileImage": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ],
+        "default": ""
+      },
+      "id": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "title": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "text": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 500
+          }
+        ]
+      },
+      "image": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      },
+      "href": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 500
+          },
+          {
+            "kind": "regex",
+            "regex": "^\\/(?!\\/)"
+          }
+        ]
+      },
+      "startsAt": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        ]
+      },
+      "endsAt": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        ]
+      },
+      "active": {
+        "type": "boolean"
+      }
+    }
+  },
+  "collection": {
+    "type": "object",
+    "fields": {
+      "sortOrder": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 0,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 9999,
+            "inclusive": true
+          }
+        ],
+        "default": 0
+      },
+      "id": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^[a-z0-9-]+$"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          }
+        ]
+      },
+      "name": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 100
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "description": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 1000
+          }
+        ]
+      },
+      "image": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      }
+    }
+  },
+  "coupon": {
+    "type": "object",
+    "fields": {
+      "code": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^[A-Z0-9-]{3,30}$"
+          }
+        ]
+      },
+      "percent": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 1,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100,
+            "inclusive": true
+          }
+        ]
+      },
+      "minimum": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 0,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100000000,
+            "inclusive": true
+          }
+        ]
+      },
+      "maxDiscount": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 0,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100000000,
+            "inclusive": true
+          }
+        ]
+      },
+      "limit": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 1,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100000,
+            "inclusive": true
+          }
+        ]
+      },
+      "endsAt": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        ]
+      },
+      "active": {
+        "type": "boolean"
+      }
+    }
+  },
+  "inquiry": {
+    "type": "object",
+    "fields": {
+      "quantity": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 1,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100000,
+            "inclusive": true
+          }
+        ],
+        "default": 1
+      },
+      "name": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 100
+          },
+          {
+            "kind": "min",
+            "value": 2
+          }
+        ]
+      },
+      "phone": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^0\\d{9}$"
+          }
+        ]
+      },
+      "email": {
+        "type": "union",
+        "options": [
+          {
+            "type": "literal",
+            "value": ""
+          },
+          {
+            "type": "string",
+            "checks": [
+              {
+                "kind": "email"
+              }
+            ]
+          }
+        ]
+      },
+      "message": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 3000
+          },
+          {
+            "kind": "min",
+            "value": 5
+          }
+        ]
+      },
+      "type": {
+        "type": "enum",
+        "values": [
+          "contact",
+          "quote",
+          "after_sales"
+        ]
+      },
+      "productId": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          }
+        ]
+      },
+      "orderId": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 100
+          }
+        ]
+      },
+      "website": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 0
+          }
+        ]
+      }
+    }
+  },
+  "product": {
+    "type": "object",
+    "fields": {
+      "id": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "regex",
+            "regex": "^[a-z0-9-]+$"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          }
+        ]
+      },
+      "name": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 150
+          },
+          {
+            "kind": "min",
+            "value": 2
+          }
+        ]
+      },
+      "sku": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "category": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "collections": {
+        "type": "array",
+        "item": {
+          "type": "string",
+          "checks": [
+            {
+              "kind": "trim"
+            },
+            {
+              "kind": "max",
+              "value": 80
+            }
+          ]
+        },
+        "max": 20
+      },
+      "price": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 0,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100000000,
+            "inclusive": true
+          }
+        ]
+      },
+      "stock": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 0,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100000,
+            "inclusive": true
+          }
+        ]
+      },
+      "unit": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 80
+          },
+          {
+            "kind": "min",
+            "value": 1
+          }
+        ]
+      },
+      "image": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "max",
+            "value": 2000
+          }
+        ]
+      },
+      "description": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 5000
+          }
+        ]
+      },
+      "storage": {
+        "type": "string",
+        "checks": [
+          {
+            "kind": "trim"
+          },
+          {
+            "kind": "max",
+            "value": 3000
+          }
+        ]
+      },
+      "mode": {
+        "type": "enum",
+        "values": [
+          "fixed",
+          "quote"
+        ]
+      },
+      "active": {
+        "type": "boolean"
+      },
+      "featured": {
+        "type": "boolean"
+      }
+    }
+  },
+  "shipping": {
+    "type": "object",
+    "fields": {
+      "fee": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 0,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 1000000,
+            "inclusive": true
+          }
+        ]
+      },
+      "freeFrom": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 1,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 100000000,
+            "inclusive": true
+          }
+        ]
+      },
+      "regionLabel": {
+        "type": "literal",
+        "value": "Hà Nội",
+        "default": "Hà Nội"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "paymentMinutes": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 15,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 1440,
+            "inclusive": true
+          }
+        ],
+        "default": 60
+      },
+      "scheduleEnabled": {
+        "type": "boolean",
+        "default": false
+      },
+      "leadHours": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 1,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 168,
+            "inclusive": true
+          }
+        ],
+        "default": 4
+      },
+      "maxDays": {
+        "type": "number",
+        "checks": [
+          {
+            "kind": "int"
+          },
+          {
+            "kind": "min",
+            "value": 1,
+            "inclusive": true
+          },
+          {
+            "kind": "max",
+            "value": 30,
+            "inclusive": true
+          }
+        ],
+        "default": 7
+      },
+      "slots": {
+        "type": "array",
+        "item": {
+          "type": "object",
+          "fields": {
+            "label": {
+              "type": "string",
+              "checks": [
+                {
+                  "kind": "trim"
+                },
+                {
+                  "kind": "max",
+                  "value": 80
+                },
+                {
+                  "kind": "min",
+                  "value": 1
+                }
+              ]
+            },
+            "start": {
+              "type": "string",
+              "checks": [
+                {
+                  "kind": "regex",
+                  "regex": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              ]
+            },
+            "capacity": {
+              "type": "number",
+              "checks": [
+                {
+                  "kind": "int"
+                },
+                {
+                  "kind": "min",
+                  "value": 1,
+                  "inclusive": true
+                },
+                {
+                  "kind": "max",
+                  "value": 1000,
+                  "inclusive": true
+                }
+              ]
+            }
+          }
+        },
+        "max": 12,
+        "default": []
+      }
+    }
+  }
+}

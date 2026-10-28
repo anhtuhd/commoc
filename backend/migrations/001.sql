@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS settings (key text PRIMARY KEY, body jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS products (id text PRIMARY KEY, body jsonb NOT NULL, sku text GENERATED ALWAYS AS (body->>'sku') STORED UNIQUE, stock bigint GENERATED ALWAYS AS ((body->>'stock')::bigint) STORED CHECK(stock>=0), price bigint GENERATED ALWAYS AS ((body->>'price')::bigint) STORED CHECK(price>=0));
+CREATE TABLE IF NOT EXISTS orders (id text PRIMARY KEY, body jsonb NOT NULL, number text GENERATED ALWAYS AS (body->>'number') STORED UNIQUE, request_key text GENERATED ALWAYS AS (body->>'key') STORED UNIQUE, payment_code text GENERATED ALWAYS AS (NULLIF(body->>'paymentCode','')) STORED UNIQUE, total bigint GENERATED ALWAYS AS ((body->>'total')::bigint) STORED CHECK(total>=0));
+CREATE TABLE IF NOT EXISTS order_items (order_id text REFERENCES orders(id), position int, product_id text NOT NULL, quantity int CHECK(quantity>0), price bigint CHECK(price>=0), snapshot jsonb NOT NULL, PRIMARY KEY(order_id,position));
+CREATE TABLE IF NOT EXISTS collections (id text PRIMARY KEY, body jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS campaigns (id text PRIMARY KEY, body jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS articles (id text PRIMARY KEY, body jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS coupons (id text PRIMARY KEY, body jsonb NOT NULL, used bigint GENERATED ALWAYS AS ((body->>'used')::bigint) STORED CHECK(used>=0));
+CREATE TABLE IF NOT EXISTS inquiries (id text PRIMARY KEY, body jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS reviews (id text PRIMARY KEY, body jsonb NOT NULL, order_id text GENERATED ALWAYS AS (body->>'orderId') STORED REFERENCES orders(id), product_id text GENERATED ALWAYS AS (body->>'productId') STORED, UNIQUE(order_id,product_id));
+CREATE TABLE IF NOT EXISTS payment_transactions (id text PRIMARY KEY,fingerprint text NOT NULL,payload jsonb NOT NULL,status text NOT NULL,reason text NOT NULL,order_id text REFERENCES orders(id),created_at timestamptz NOT NULL DEFAULT now(),resolved_by text,resolved_at timestamptz,conflict int NOT NULL DEFAULT 0);
+CREATE UNIQUE INDEX IF NOT EXISTS payment_order_once ON payment_transactions(order_id) WHERE status='matched';
+CREATE TABLE IF NOT EXISTS notification_outbox (id text PRIMARY KEY,transaction_id text,kind text NOT NULL,message text NOT NULL,status text NOT NULL DEFAULT 'pending',attempts int NOT NULL DEFAULT 0,retry_at timestamptz NOT NULL DEFAULT now(),lease text,lease_until timestamptz,created_at timestamptz NOT NULL DEFAULT now(),sent_at timestamptz,last_error text);
+CREATE INDEX IF NOT EXISTS notification_due ON notification_outbox(status,retry_at);
+CREATE TABLE IF NOT EXISTS rate_limits (key text PRIMARY KEY,count int NOT NULL,until_at timestamptz NOT NULL);
+CREATE TABLE IF NOT EXISTS performance_samples (id text PRIMARY KEY,name text NOT NULL,path text NOT NULL,value double precision NOT NULL,device text NOT NULL,at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS performance_at ON performance_samples(at);
+
+ALTER TABLE products ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
+ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS position integer NOT NULL DEFAULT 0;

@@ -65,3 +65,8 @@ yarn-error.log*
 # Safe environment templates belong in source control
 !.env.example
 !.dev.vars.example
+
+/backend/qa-seed.json
+/backend/server
+
+/node_modules
