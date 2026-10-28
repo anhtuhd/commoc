@@ -299,7 +299,15 @@ func (a *App) storeGet(w http.ResponseWriter, r *http.Request, path string) {
 			http.Error(w, "Unavailable", 503)
 			return
 		}
-		jsonReply(w, Object{"config": s["notifications"], "status": s["zaloStatus"], "failed": rows}, 200)
+		config := obj(s["notifications"])
+		if len(config) == 0 {
+			config = Object{"enabled": false, "phone": ""}
+		}
+		status := obj(s["zaloStatus"])
+		if len(status) == 0 {
+			status = Object{"state": "disconnected"}
+		}
+		jsonReply(w, Object{"config": config, "status": status, "failed": rows}, 200)
 	case "backup":
 		if role(s, user) != "owner" {
 			http.Error(w, "Forbidden", 403)

@@ -293,3 +293,40 @@ func TestOutboxRetriesWithoutLosingPayment(t *testing.T) {
 		t.Fatal("retry failed", status, attempts, e)
 	}
 }
+func TestDeliveryCapacityAndCouponAreReservedAtomically(t *testing.T) {
+	a := testDB(t)
+	ctx := context.Background()
+	date := time.Now().In(time.FixedZone("VN", 25200)).AddDate(0, 0, 1).Format("2006-01-02")
+	_, e := a.DB.Update(ctx, false, func(s State, _ pgx.Tx) (any, error) {
+		shipping := obj(s["shipping"])
+		shipping["scheduleEnabled"] = true
+		shipping["leadHours"] = 1
+		shipping["maxDays"] = 7
+		shipping["slots"] = []Object{{"label": "Trưa", "start": "12:00", "capacity": 1}}
+		s["coupons"] = []Object{{"code": "QA10", "percent": 10, "minimum": 0, "maxDiscount": 10000, "limit": 1, "used": 0, "endsAt": "2099-12-31", "active": true}}
+		return nil, nil
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	b := orderInput()
+	b["delivery"] = Object{"date": date, "slot": "Trưa"}
+	b["coupon"] = "QA10"
+	v, e := a.DB.Update(ctx, true, func(s State, _ pgx.Tx) (any, error) { return placeOrder(s, b) })
+	if e != nil {
+		t.Fatal(e)
+	}
+	b["key"] = "second-order-request"
+	if _, e = a.DB.Update(ctx, true, func(s State, _ pgx.Tx) (any, error) { return placeOrder(s, b) }); e == nil {
+		t.Fatal("slot/coupon overbooked")
+	}
+	_, e = a.DB.Update(ctx, false, func(s State, _ pgx.Tx) (any, error) {
+		return nil, changeOrder(s, Object{"id": obj(v)["id"], "status": "cancelled", "paymentStatus": "unpaid"})
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = a.DB.Update(ctx, true, func(s State, _ pgx.Tx) (any, error) { return placeOrder(s, b) }); e != nil {
+		t.Fatal("reservation not released", e)
+	}
+}
