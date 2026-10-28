@@ -1,2 +1,5 @@
-import {COOKIE} from '../../../../lib/vps/auth';
-export async function POST(req:Request){const origin=(process.env.COMMO_SITE_ORIGIN||process.env.NEXT_PUBLIC_SITE_URL);if(!origin||req.headers.get('origin')!==origin)return new Response('Forbidden',{status:403});return new Response(null,{status:303,headers:{Location:origin+'/','Set-Cookie':`${COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0`,'Cache-Control':'no-store'}})}
+import {proxy} from '../../../../lib/go/client';
+export const dynamic='force-dynamic';
+export const runtime='nodejs';
+export const GET=proxy;
+export const POST=proxy;

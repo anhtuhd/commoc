@@ -1,3 +1,5 @@
-import {issueSession,checkPassword,COOKIE} from '../../../../lib/vps/auth';
-import {updateState,rateLimit} from '../../../../lib/shop/repository';
-export async function POST(req:Request){const origin=(process.env.COMMO_SITE_ORIGIN||process.env.NEXT_PUBLIC_SITE_URL);if(process.env.COMMO_RUNTIME!=='vps'||!origin||req.headers.get('origin')!==origin)return new Response('Forbidden',{status:403});try{if(Number(req.headers.get('content-length')||0)>4096)throw Error();const ip=req.headers.get('cf-connecting-ip')||'unknown';await updateState(s=>rateLimit(s,'login:'+ip,10));const raw=await req.text();if(raw.length>4096)throw Error();const f=new URLSearchParams(raw);const user=f.get('username')||'';if(!checkPassword(user,f.get('password')||''))throw Error();return new Response(null,{status:303,headers:{Location:origin+'/quan-tri','Set-Cookie':`${COOKIE}=${issueSession(user)}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=28800`,'Cache-Control':'no-store'}})}catch{return new Response(null,{status:303,headers:{Location:origin+'/dang-nhap?error=1','Cache-Control':'no-store'}})}}
+import {proxy} from '../../../../lib/go/client';
+export const dynamic='force-dynamic';
+export const runtime='nodejs';
+export const GET=proxy;
+export const POST=proxy;

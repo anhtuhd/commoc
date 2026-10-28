@@ -1,11 +1,12 @@
 import {getChatGPTUser} from '../../chatgpt-auth';
 import {readState,publicData} from '../../../lib/shop/repository';
-import {authorize} from '../../../lib/shop/access';
+import {headers} from 'next/headers';
+import {backend} from '../../../lib/go/client';
 import {SITE_URL} from '../../../lib/shop/structured-data';
 import {auditHtml} from '../../../lib/diagnostics/seo';
 export const dynamic='force-dynamic';
 let lastRun=0;
-export async function GET(){const user=await getChatGPTUser();if(!user)return Response.json({error:'Vui lòng đăng nhập.'},{status:401});const {state}=await readState();try{authorize(state,user.userId,['owner']);}catch{return Response.json({error:'Không có quyền.'},{status:403});}if(Date.now()-lastRun<30000)return Response.json({error:'Chờ 30 giây trước khi kiểm tra lại.'},{status:429});lastRun=Date.now();
+export async function GET(){const user=await getChatGPTUser();if(!user)return Response.json({error:'Vui lòng đăng nhập.'},{status:401});const {state}=await readState();try{const session=await backend<import('../../../lib/go/client').Session>('/api/store/session',{headers:{cookie:(await headers()).get('cookie')||''}});if(session.role!=='owner')throw Error('Forbidden');}catch{return Response.json({error:'Không có quyền.'},{status:403});}if(Date.now()-lastRun<30000)return Response.json({error:'Chờ 30 giây trước khi kiểm tra lại.'},{status:429});lastRun=Date.now();
  const data=publicData(state),base=process.env.COMMO_SITE_ORIGIN||SITE_URL;
  const paths=['/','/san-pham','/bo-suu-tap','/cau-chuyen','/bai-viet','/lien-he','/chinh-sach/giao-hang','/chinh-sach/doi-tra','/chinh-sach/bao-mat',...data.products.map(p=>'/san-pham/'+p.id),...data.articles.map(a=>'/bai-viet/'+a.id)].slice(0,40);
  const pages=[];for(let i=0;i<paths.length;i+=3){pages.push(...await Promise.all(paths.slice(i,i+3).map(async path=>{try{const start=performance.now(),r=await fetch(new URL(path,base),{signal:AbortSignal.timeout(10000),redirect:'error',cache:'no-store'});const html=await r.text();return {...auditHtml(html,path,SITE_URL,r.status),responseMs:Math.round(performance.now()-start)};}catch{return {path,error:'Không tải được trang trong 10 giây.'};}})));}

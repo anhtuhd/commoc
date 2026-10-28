@@ -21,10 +21,9 @@ const CALLBACK_PATH = "/callback";
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
   const requestHeaders = await headers();
   if(process.env.COMMO_RUNTIME==='vps'){
-    const {verifySession,COOKIE}=await import('../lib/vps/auth');
-    const token=requestHeaders.get('cookie')?.split(';').map(x=>x.trim()).find(x=>x.startsWith(COOKIE+'='))?.slice(COOKIE.length+1)||'';
-    const userId=verifySession(token);
-    return userId?{userId,displayName:'Chủ cửa hàng',email:process.env.ADMIN_EMAIL||'',fullName:null}:null;
+    const {backend}=await import('../lib/go/client');
+    const session=await backend<import('../lib/go/client').Session>('/api/store/session',{headers:{cookie:requestHeaders.get('cookie')||''}});
+    return session.user?{userId:session.user.id,displayName:session.user.name,email:session.user.email,fullName:null}:null;
   }
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);
