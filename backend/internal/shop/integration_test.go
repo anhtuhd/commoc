@@ -330,3 +330,30 @@ func TestDeliveryCapacityAndCouponAreReservedAtomically(t *testing.T) {
 		t.Fatal("reservation not released", e)
 	}
 }
+
+func TestDiagnosticsReportsPersistedMetrics(t *testing.T) {
+	a := testDB(t)
+	ctx := context.Background()
+	_, err := a.DB.Pool.Exec(ctx, `INSERT INTO performance_samples(id,name,path,value,device) VALUES ('qa-lcp','LCP','/',2000,'mobile')`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest("GET", "/api/diagnostics", nil)
+	req.AddCookie(&http.Cookie{Name: cookieName, Value: a.session(a.AdminUser)})
+	response := httptest.NewRecorder()
+	a.diagnostics(response, req)
+	if response.Code != 200 {
+		t.Fatalf("diagnostics status %d: %s", response.Code, response.Body.String())
+	}
+	var report Object
+	if err := json.Unmarshal(response.Body.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if num(report["total"]) != 1 || len(list(report["groups"])) != 1 {
+		t.Fatalf("unexpected report: %v", report)
+	}
+	group := list(report["groups"])[0]
+	if num(group["p75"]) != 2000 || group["rating"] != "good" {
+		t.Fatalf("unexpected aggregation: %v", group)
+	}
+}

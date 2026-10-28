@@ -40,7 +40,7 @@ func (a *App) diagnostics(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", 403)
 		return
 	}
-	samples, e := rowsJSON(r.Context(), a.DB.Pool, "SELECT row_to_json(t) FROM (SELECT id,name,path,value,device,extract(epoch FROM at)*1000 at FROM performance_samples WHERE at>=now()-interval '7 days' ORDER BY at DESC LIMIT 10000) t")
+	samples, e := rowsJSON(r.Context(), a.DB.Pool, `SELECT row_to_json(t) FROM (SELECT id,name,path,value,device,extract(epoch FROM at)*1000 AS "at" FROM performance_samples WHERE at>=now()-interval '7 days' ORDER BY at DESC LIMIT 10000) t`)
 	if e != nil {
 		http.Error(w, "Unavailable", 503)
 		return
