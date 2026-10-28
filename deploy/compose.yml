@@ -23,6 +23,7 @@ services:
       SITE_URL: https://pishare.cloud
       ZALO_BRIDGE_URL: http://zalo:8081
       MEDIA_DIR: /data/media
+      PRODUCT_OPTIONS_ENABLED: ${PRODUCT_OPTIONS_ENABLED:-0}
     volumes:
       - /opt/commoc/media:/data/media
     ports: ['127.0.0.1:3402:8080']

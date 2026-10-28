@@ -38,3 +38,13 @@ test('published journal heading drives visible and structured breadcrumbs, draft
  assert.equal(schema.itemListElement[1].name,'Tin từ cửa hàng');
  s.brand.journalTitle='';assert.equal(breadcrumbs(s,['bai-viet'])[1].name,'Chuyện bên chén trà');
 });
+
+test('variable-price choices never advertise a fabricated fixed offer',()=>{
+ const s=initialState();s.products[0].optionGroups=[{id:'size',name:'Cỡ',type:'single',min:1,max:1,active:true,choices:[{id:'small',name:'Nhỏ',priceDelta:-10000,active:true},{id:'large',name:'Lớn',priceDelta:10000,active:true}]}];
+ const product=nodes(s,['san-pham','com-tuoi']).find(n=>n['@type']==='Product');assert.equal(product,undefined);
+});
+test('equal-price configurations emit the actual fixed price when enabled',()=>{
+ if(process.env.NEXT_PUBLIC_PRODUCT_OPTIONS_ENABLED!=='1')return;
+ const s=initialState();s.products[0].optionGroups=[{id:'size',name:'Cỡ',type:'single',min:1,max:1,active:true,choices:[{id:'small',name:'Nhỏ',priceDelta:5000,active:true},{id:'large',name:'Lớn',priceDelta:5000,active:true}]}];
+ const product=nodes(s,['san-pham','com-tuoi']).find(n=>n['@type']==='Product');assert.equal(product.offers.price,125000);
+});

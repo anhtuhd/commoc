@@ -837,6 +837,148 @@
                 },
                 "featured": {
                   "type": "boolean"
+                },
+                "optionGroups": {
+                  "type": "array",
+                  "max": 10,
+                  "item": {
+                    "type": "object",
+                    "fields": {
+                      "id": {
+                        "type": "string",
+                        "checks": [
+                          {
+                            "kind": "regex",
+                            "regex": "^[a-z0-9-]+$"
+                          },
+                          {
+                            "kind": "max",
+                            "value": 80
+                          }
+                        ]
+                      },
+                      "name": {
+                        "type": "string",
+                        "checks": [
+                          {
+                            "kind": "trim"
+                          },
+                          {
+                            "kind": "min",
+                            "value": 1
+                          },
+                          {
+                            "kind": "max",
+                            "value": 80
+                          }
+                        ]
+                      },
+                      "type": {
+                        "type": "enum",
+                        "values": [
+                          "single",
+                          "multiple"
+                        ]
+                      },
+                      "min": {
+                        "type": "number",
+                        "checks": [
+                          {
+                            "kind": "int"
+                          },
+                          {
+                            "kind": "min",
+                            "value": 0
+                          },
+                          {
+                            "kind": "max",
+                            "value": 20
+                          }
+                        ]
+                      },
+                      "max": {
+                        "type": "number",
+                        "checks": [
+                          {
+                            "kind": "int"
+                          },
+                          {
+                            "kind": "min",
+                            "value": 1
+                          },
+                          {
+                            "kind": "max",
+                            "value": 20
+                          }
+                        ]
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "choices": {
+                        "type": "array",
+                        "max": 20,
+                        "item": {
+                          "type": "object",
+                          "fields": {
+                            "id": {
+                              "type": "string",
+                              "checks": [
+                                {
+                                  "kind": "regex",
+                                  "regex": "^[a-z0-9-]+$"
+                                },
+                                {
+                                  "kind": "max",
+                                  "value": 80
+                                }
+                              ]
+                            },
+                            "name": {
+                              "type": "string",
+                              "checks": [
+                                {
+                                  "kind": "trim"
+                                },
+                                {
+                                  "kind": "min",
+                                  "value": 1
+                                },
+                                {
+                                  "kind": "max",
+                                  "value": 80
+                                }
+                              ]
+                            },
+                            "priceDelta": {
+                              "type": "number",
+                              "checks": [
+                                {
+                                  "kind": "int"
+                                },
+                                {
+                                  "kind": "min",
+                                  "value": -100000000
+                                },
+                                {
+                                  "kind": "max",
+                                  "value": 100000000
+                                }
+                              ]
+                            },
+                            "active": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "optional": true
+                },
+                "noteEnabled": {
+                  "type": "boolean",
+                  "optional": true
                 }
               }
             },
@@ -2420,6 +2562,148 @@
       },
       "featured": {
         "type": "boolean"
+      },
+      "optionGroups": {
+        "type": "array",
+        "max": 10,
+        "item": {
+          "type": "object",
+          "fields": {
+            "id": {
+              "type": "string",
+              "checks": [
+                {
+                  "kind": "regex",
+                  "regex": "^[a-z0-9-]+$"
+                },
+                {
+                  "kind": "max",
+                  "value": 80
+                }
+              ]
+            },
+            "name": {
+              "type": "string",
+              "checks": [
+                {
+                  "kind": "trim"
+                },
+                {
+                  "kind": "min",
+                  "value": 1
+                },
+                {
+                  "kind": "max",
+                  "value": 80
+                }
+              ]
+            },
+            "type": {
+              "type": "enum",
+              "values": [
+                "single",
+                "multiple"
+              ]
+            },
+            "min": {
+              "type": "number",
+              "checks": [
+                {
+                  "kind": "int"
+                },
+                {
+                  "kind": "min",
+                  "value": 0
+                },
+                {
+                  "kind": "max",
+                  "value": 20
+                }
+              ]
+            },
+            "max": {
+              "type": "number",
+              "checks": [
+                {
+                  "kind": "int"
+                },
+                {
+                  "kind": "min",
+                  "value": 1
+                },
+                {
+                  "kind": "max",
+                  "value": 20
+                }
+              ]
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "choices": {
+              "type": "array",
+              "max": 20,
+              "item": {
+                "type": "object",
+                "fields": {
+                  "id": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "regex",
+                        "regex": "^[a-z0-9-]+$"
+                      },
+                      {
+                        "kind": "max",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "checks": [
+                      {
+                        "kind": "trim"
+                      },
+                      {
+                        "kind": "min",
+                        "value": 1
+                      },
+                      {
+                        "kind": "max",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "priceDelta": {
+                    "type": "number",
+                    "checks": [
+                      {
+                        "kind": "int"
+                      },
+                      {
+                        "kind": "min",
+                        "value": -100000000
+                      },
+                      {
+                        "kind": "max",
+                        "value": 100000000
+                      }
+                    ]
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "optional": true
+      },
+      "noteEnabled": {
+        "type": "boolean",
+        "optional": true
       }
     }
   },

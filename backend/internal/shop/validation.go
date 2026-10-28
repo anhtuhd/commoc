@@ -8,6 +8,7 @@ import (
 	"net/mail"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -185,6 +186,54 @@ func refine(name string, b Object) error {
 	}
 	if name == "product" && str(b["mode"]) == "fixed" && num(b["price"]) <= 0 {
 		return fail("Sản phẩm bán trực tiếp cần giá lớn hơn 0.")
+	}
+	if name == "product" {
+		groups, choices := map[string]bool{}, map[string]bool{}
+		minPrice, maxPrice := num(b["price"]), num(b["price"])
+		for _, group := range list(b["optionGroups"]) {
+			gid := str(group["id"])
+			if groups[gid] {
+				return fail("Mã nhóm lựa chọn bị trùng.")
+			}
+			groups[gid] = true
+			min, max := int(num(group["min"])), int(num(group["max"]))
+			if min > max || (str(group["type"]) == "single" && max != 1) {
+				return fail("Giới hạn nhóm lựa chọn không hợp lệ.")
+			}
+			available := 0
+			prices := []float64{}
+			for _, choice := range list(group["choices"]) {
+				cid := str(choice["id"])
+				if choices[cid] {
+					return fail("Mã lựa chọn bị trùng.")
+				}
+				choices[cid] = true
+				if yes(choice["active"]) {
+					available++
+					prices = append(prices, num(choice["priceDelta"]))
+				}
+			}
+			if yes(group["active"]) && min > available {
+				return fail("Không đủ lựa chọn đang bán cho nhóm bắt buộc.")
+			}
+			if yes(group["active"]) {
+				sort.Float64s(prices)
+				for i, v := range prices {
+					if i < min || (i < max && v < 0) {
+						minPrice += v
+					}
+				}
+				for i := len(prices) - 1; i >= 0; i-- {
+					rank := len(prices) - 1 - i
+					if rank < min || (rank < max && prices[i] > 0) {
+						maxPrice += prices[i]
+					}
+				}
+			}
+		}
+		if minPrice < 0 || maxPrice > 100000000 {
+			return fail("Giá sau lựa chọn phải từ 0 đến 100 triệu đồng.")
+		}
 	}
 	if name == "campaign" && str(b["endsAt"]) < str(b["startsAt"]) {
 		return fail("Ngày kết thúc phải sau ngày bắt đầu.")

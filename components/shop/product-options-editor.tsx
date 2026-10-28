@@ -1,0 +1,22 @@
+'use client';
+import type {ProductOptionGroup} from '../../lib/shop/types';
+import {priceRange} from '../../lib/shop/product-options';
+import {money} from './context';
+
+const newId=()=>crypto.randomUUID();
+export function ProductOptionsEditor({groups,noteEnabled,basePrice,onChange}:{groups:ProductOptionGroup[];noteEnabled:boolean;basePrice:number;onChange:(groups:ProductOptionGroup[],noteEnabled:boolean)=>void}) {
+ const update=(index:number,patch:Partial<ProductOptionGroup>)=>onChange(groups.map((g,i)=>i===index?{...g,...patch}:g),noteEnabled);
+ return <section className="panel stack"><h3>Phân loại, topping và ghi chú</h3><p>Giá lựa chọn được cộng vào giá cơ bản. Tồn kho dùng chung theo sản phẩm.</p>{(()=>{const range=priceRange({price:basePrice,optionGroups:groups} as import('../../lib/shop/types').Product);return <p>Xem trước: {range?money(range.min)+' – '+money(range.max):'Chưa đủ lựa chọn để bán'}</p>})()}
+  <label className="option-choice"><input type="checkbox" checked={noteEnabled} onChange={e=>onChange(groups,e.target.checked)}/> Cho phép khách ghi chú từng món</label>
+  {groups.map((g,index)=><fieldset className="panel stack" key={g.id}><legend>Nhóm {index+1}</legend><div className="button-row"><button type="button" className="text-link" disabled={index===0} onClick={()=>{const next=[...groups];[next[index-1],next[index]]=[next[index],next[index-1]];onChange(next,noteEnabled)}}>Lên</button><button type="button" className="text-link" disabled={index===groups.length-1} onClick={()=>{const next=[...groups];[next[index+1],next[index]]=[next[index],next[index+1]];onChange(next,noteEnabled)}}>Xuống</button></div>
+   <label>Tên nhóm<input required maxLength={80} value={g.name} onChange={e=>update(index,{name:e.target.value})}/></label>
+   <label>Kiểu lựa chọn<select value={g.type} onChange={e=>update(index,{type:e.target.value as ProductOptionGroup['type'],max:e.target.value==='single'?1:Math.max(1,g.max),min:Math.min(g.min,e.target.value==='single'?1:g.max)})}><option value="single">Chọn một (phân loại)</option><option value="multiple">Chọn nhiều (topping)</option></select></label>
+   <div className="form-grid"><label>Chọn ít nhất<input type="number" min={0} max={20} value={g.min} onChange={e=>update(index,{min:Number(e.target.value)})}/></label><label>Chọn tối đa<input type="number" min={1} max={20} disabled={g.type==='single'} value={g.max} onChange={e=>update(index,{max:Number(e.target.value)})}/></label></div>
+   <label className="option-choice"><input type="checkbox" checked={g.active} onChange={e=>update(index,{active:e.target.checked})}/> Hiển thị nhóm</label>
+   {g.choices.map((c,ci)=><div key={c.id} className="panel stack"><div className="button-row"><button type="button" className="text-link" disabled={ci===0} onClick={()=>{const next=[...g.choices];[next[ci-1],next[ci]]=[next[ci],next[ci-1]];update(index,{choices:next})}}>Lên</button><button type="button" className="text-link" disabled={ci===g.choices.length-1} onClick={()=>{const next=[...g.choices];[next[ci+1],next[ci]]=[next[ci],next[ci+1]];update(index,{choices:next})}}>Xuống</button></div><label>Tên lựa chọn<input required maxLength={80} value={c.name} onChange={e=>update(index,{choices:g.choices.map((x,i)=>i===ci?{...x,name:e.target.value}:x)})}/></label><label>Giá cộng/trừ (VND)<input type="number" min={-100000000} max={100000000} step={1} value={c.priceDelta} onChange={e=>update(index,{choices:g.choices.map((x,i)=>i===ci?{...x,priceDelta:Number(e.target.value)}:x)})}/></label><label className="option-choice"><input type="checkbox" checked={c.active} onChange={e=>update(index,{choices:g.choices.map((x,i)=>i===ci?{...x,active:e.target.checked}:x)})}/> Đang bán</label><button type="button" className="text-link" onClick={()=>update(index,{choices:g.choices.filter((_,i)=>i!==ci)})}>Xóa lựa chọn</button></div>)}
+   <button type="button" className="button outline small" disabled={g.choices.length>=20} onClick={()=>update(index,{choices:[...g.choices,{id:newId(),name:'Lựa chọn mới',priceDelta:0,active:true}]})}>Thêm lựa chọn</button>
+   <button type="button" className="text-link" onClick={()=>onChange(groups.filter((_,i)=>i!==index),noteEnabled)}>Xóa nhóm</button>
+  </fieldset>)}
+  <button type="button" className="button outline small" disabled={groups.length>=10} onClick={()=>onChange([...groups,{id:newId(),name:'Nhóm mới',type:'single',min:0,max:1,active:true,choices:[]}],noteEnabled)}>Thêm nhóm lựa chọn</button>
+ </section>
+}

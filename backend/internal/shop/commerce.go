@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -22,31 +24,35 @@ func quote(s State, b Object) (Object, error) {
 		return nil, fail("Giỏ hàng chưa hợp lệ.")
 	}
 	counts := map[string]int{}
-	ids := []string{}
+	items := []Object{}
+	subtotal := float64(0)
 	for _, i := range input {
 		n := num(i["quantity"])
 		key := str(i["id"])
 		if key == "" || n != math.Trunc(n) || n < 1 || n > 99 {
 			return nil, fail("Số lượng chưa hợp lệ.")
 		}
-		if counts[key] == 0 {
-			ids = append(ids, key)
-		}
 		counts[key] += int(n)
-	}
-	items := []Object{}
-	subtotal := float64(0)
-	for _, key := range ids {
-		n := counts[key]
 		p := find(s, "products", "id", key)
 		if p == nil || !yes(p["active"]) || str(p["mode"]) == "quote" {
 			return nil, fail("Sản phẩm cần báo giá hoặc không còn mở bán.")
 		}
-		if n > 99 || float64(n) > num(p["stock"]) {
+		if counts[key] > 99 || float64(counts[key]) > num(p["stock"]) {
 			return nil, fail(str(p["name"]) + ": không đủ số lượng trong kho.")
 		}
-		items = append(items, Object{"id": key, "name": p["name"], "unit": p["unit"], "price": p["price"], "quantity": n})
-		subtotal += float64(n) * num(p["price"])
+		selected, note, price, err := priceOptions(p, i)
+		if err != nil {
+			return nil, err
+		}
+		item := Object{"id": key, "name": p["name"], "unit": p["unit"], "price": price, "quantity": n}
+		if len(selected) > 0 {
+			item["options"] = selected
+		}
+		if note != "" {
+			item["note"] = note
+		}
+		items = append(items, item)
+		subtotal += n * price
 	}
 	shipping := num(cfg["fee"])
 	if subtotal >= num(cfg["freeFrom"]) {
@@ -62,7 +68,79 @@ func quote(s State, b Object) (Object, error) {
 		}
 		discount = math.Min(math.Floor(subtotal*num(c["percent"])/100), math.Min(num(c["maxDiscount"]), subtotal))
 	}
-	return Object{"items": items, "subtotal": subtotal, "shipping": shipping, "discount": discount, "total": subtotal + shipping - discount, "coupon": code}, nil
+	result := Object{"items": items, "subtotal": subtotal, "shipping": shipping, "discount": discount, "total": subtotal + shipping - discount, "coupon": code}
+	sum := sha256.Sum256(encoded(result))
+	result["quoteRevision"] = hex.EncodeToString(sum[:])
+	return result, nil
+}
+
+// priceOptions treats the catalog as authoritative; callers never supply prices.
+func priceOptions(p, input Object) ([]Object, string, float64, error) {
+	bad := func() ([]Object, string, float64, error) {
+		return nil, "", 0, fail("Lựa chọn sản phẩm không hợp lệ hoặc đã thay đổi. Vui lòng chọn lại.")
+	}
+	selected := map[string]bool{}
+	if raw, ok := input["optionIds"]; ok && raw != nil {
+		ids, ok := raw.([]any)
+		if !ok {
+			return bad()
+		}
+		if len(ids) > 100 {
+			return bad()
+		}
+		for _, value := range ids {
+			id, ok := value.(string)
+			if !ok || id == "" || selected[id] {
+				return bad()
+			}
+			selected[id] = true
+		}
+	}
+	note, ok := input["note"].(string)
+	if input["note"] != nil && !ok {
+		return bad()
+	}
+	note = strings.TrimSpace(note)
+	if os.Getenv("PRODUCT_OPTIONS_ENABLED") != "1" {
+		if yes(p["noteEnabled"]) || len(selected) > 0 || note != "" {
+			return bad()
+		}
+		for _, group := range list(p["optionGroups"]) {
+			if yes(group["active"]) {
+				return bad()
+			}
+		}
+	}
+	if len([]rune(note)) > 500 || (note != "" && !yes(p["noteEnabled"])) {
+		return bad()
+	}
+	price := num(p["price"])
+	snapshot := []Object{}
+	for _, group := range list(p["optionGroups"]) {
+		count := 0
+		for _, choice := range list(group["choices"]) {
+			key := str(choice["id"])
+			if !selected[key] {
+				continue
+			}
+			if !yes(group["active"]) || !yes(choice["active"]) {
+				return bad()
+			}
+			delete(selected, key)
+			count++
+			delta := num(choice["priceDelta"])
+			price += delta
+			snapshot = append(snapshot, Object{"groupId": group["id"], "groupName": group["name"], "id": key, "name": choice["name"], "priceDelta": delta})
+		}
+		if yes(group["active"]) && (count < int(num(group["min"])) || count > int(num(group["max"]))) {
+			return bad()
+		}
+	}
+	if len(selected) != 0 || price < 0 || price > 100000000 {
+		return bad()
+	}
+	sort.Slice(snapshot, func(i, j int) bool { return str(snapshot[i]["id"]) < str(snapshot[j]["id"]) })
+	return snapshot, note, price, nil
 }
 func deliveryOptions(s State, now time.Time) []Object {
 	result := []Object{}
@@ -153,6 +231,17 @@ func placeOrder(s State, b Object) (Object, error) {
 	if e != nil {
 		return nil, e
 	}
+	for _, item := range list(b["items"]) {
+		p := find(s, "products", "id", str(item["id"]))
+		configurable := yes(p["noteEnabled"])
+		for _, group := range list(p["optionGroups"]) {
+			configurable = configurable || yes(group["active"])
+		}
+		if configurable && str(b["quoteRevision"]) != str(q["quoteRevision"]) {
+			return nil, fail("Giá hoặc lựa chọn đã thay đổi. Vui lòng cập nhật và xác nhận lại đơn hàng.")
+		}
+	}
+	delete(q, "quoteRevision")
 	for _, i := range list(q["items"]) {
 		p := find(s, "products", "id", str(i["id"]))
 		p["stock"] = num(p["stock"]) - num(i["quantity"])
@@ -256,11 +345,16 @@ func truncate(s string, n int) string {
 }
 func orderMessage(o Object, site string) string {
 	c := obj(o["customer"])
-	lines := []string{fmt.Sprintf("Đơn mới %s · %s", str(o["number"]), str(obj(o["brand"])["name"])), str(c["name"]) + " · " + str(c["phone"]), str(c["address"])}
+	lines := []string{fmt.Sprintf("Đơn mới %s · %s", str(o["number"]), str(obj(o["brand"])["name"])), str(c["name"]) + " · " + str(c["phone"]), str(c["address"]), fmt.Sprintf("Tổng: %.0f VND · %s", num(o["total"]), str(o["payment"]))}
 	for _, item := range list(o["items"]) {
 		lines = append(lines, fmt.Sprintf("%.0f × %s", num(item["quantity"]), str(item["name"])))
+		for _, option := range list(item["options"]) {
+			lines = append(lines, "  "+str(option["groupName"])+": "+str(option["name"]))
+		}
+		if note := str(item["note"]); note != "" {
+			lines = append(lines, "  Ghi chú món: "+truncate(note, 200))
+		}
 	}
-	lines = append(lines, fmt.Sprintf("Tổng: %.0f VND · %s", num(o["total"]), str(o["payment"])))
 	if d := obj(o["delivery"]); len(d) > 0 {
 		lines = append(lines, "Giao: "+str(d["date"])+" "+str(d["slot"]))
 	}

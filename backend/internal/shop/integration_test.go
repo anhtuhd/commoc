@@ -357,3 +357,121 @@ func TestDiagnosticsReportsPersistedMetrics(t *testing.T) {
 		t.Fatalf("unexpected aggregation: %v", group)
 	}
 }
+
+func TestPostgresConcurrentOptionOrders(t *testing.T) {
+	t.Setenv("PRODUCT_OPTIONS_ENABLED", "1")
+	a := testDB(t)
+	ctx := context.Background()
+	_, e := a.DB.Update(ctx, false, func(s State, _ pgx.Tx) (any, error) {
+		p := list(s["products"])[0]
+		p["optionGroups"] = []Object{{"id": "size", "name": "Cỡ", "type": "single", "min": 1, "max": 1, "active": true, "choices": []Object{{"id": "large", "name": "Lớn", "priceDelta": 10000, "active": true}}}}
+		p["noteEnabled"] = true
+		return nil, nil
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	var wg sync.WaitGroup
+	successes := make(chan bool, 6)
+	for n := 0; n < 6; n++ {
+		wg.Add(1)
+		go func(n int) {
+			defer wg.Done()
+			b := orderInput()
+			b["key"] = "option-concurrent-" + strings.Repeat("x", n+1)
+			b["items"] = []Object{{"id": "com", "quantity": 1, "optionIds": []any{"large"}, "note": "Ít ngọt"}}
+			_, e := a.DB.Update(ctx, true, func(s State, _ pgx.Tx) (any, error) {
+				qb := clean(b)
+				qb["region"] = "hanoi"
+				q, err := quote(s, qb)
+				if err != nil {
+					return nil, err
+				}
+				b["quoteRevision"] = q["quoteRevision"]
+				return placeOrder(s, b)
+			})
+			successes <- e == nil
+		}(n)
+	}
+	wg.Wait()
+	close(successes)
+	count := 0
+	for ok := range successes {
+		if ok {
+			count++
+		}
+	}
+	if count != 2 {
+		t.Fatalf("expected two reservations, got %d", count)
+	}
+	s, e := a.DB.Read(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	orders := list(s["orders"])
+	if len(orders) != 2 || num(list(s["products"])[0]["stock"]) != 0 {
+		t.Fatal("incorrect inventory")
+	}
+	for _, o := range orders {
+		i := list(o["items"])[0]
+		if str(i["note"]) != "Ít ngọt" || num(i["price"]) != 110000 || str(list(i["options"])[0]["name"]) != "Lớn" {
+			t.Fatal("snapshot missing", i)
+		}
+	}
+}
+
+func TestPostgresOptionOrderSePayAndOutbox(t *testing.T) {
+	t.Setenv("PRODUCT_OPTIONS_ENABLED", "1")
+	a := testDB(t)
+	ctx := context.Background()
+	_, e := a.DB.Update(ctx, false, func(s State, _ pgx.Tx) (any, error) {
+		p := list(s["products"])[0]
+		p["optionGroups"] = []Object{{"id": "topping", "name": "Topping", "type": "multiple", "min": 0, "max": 1, "active": true, "choices": []Object{{"id": "dua", "name": "Dừa", "priceDelta": 5000, "active": true}}}}
+		p["noteEnabled"] = true
+		return nil, nil
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	b := orderInput()
+	b["items"] = []Object{{"id": "com", "quantity": 1, "optionIds": []any{"dua"}, "note": "Ít ngọt"}}
+	o, e := a.DB.Update(ctx, true, func(s State, _ pgx.Tx) (any, error) {
+		qinput := clean(b)
+		qinput["region"] = "hanoi"
+		q, err := quote(s, qinput)
+		if err != nil {
+			return nil, err
+		}
+		b["quoteRevision"] = q["quoteRevision"]
+		return placeOrder(s, b)
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	order := obj(o)
+	if num(order["total"]) != 135000 {
+		t.Fatal("wrong payable total", order)
+	}
+	var payment Object
+	_ = json.Unmarshal(encoded(paymentFor(order, 230)), &payment)
+	for n := 0; n < 2; n++ {
+		if _, e = a.receive(ctx, payment); e != nil {
+			t.Fatal(e)
+		}
+	}
+	s, e := a.DB.Read(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	saved := find(s, "orders", "id", str(order["id"]))
+	if saved["paymentStatus"] != "paid" || str(list(list(saved["items"])[0]["options"])[0]["name"]) != "Dừa" {
+		t.Fatal("payment or snapshot lost", saved)
+	}
+	var count int
+	if e = a.DB.Pool.QueryRow(ctx, "SELECT count(*) FROM notification_outbox").Scan(&count); e != nil || count != 1 {
+		t.Fatalf("outbox duplicated: %d %v", count, e)
+	}
+	if msg := orderMessage(saved, "http://localhost"); !strings.Contains(msg, "Topping: Dừa") || !strings.Contains(msg, "Ít ngọt") {
+		t.Fatal("missing option in notification")
+	}
+}

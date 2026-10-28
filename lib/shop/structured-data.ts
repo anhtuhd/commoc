@@ -2,6 +2,7 @@ import {reviewSummary} from './review-summary.ts';
 import {breadcrumbs} from './breadcrumbs.ts';
 export {breadcrumbs} from './breadcrumbs.ts';
 import {business} from './business.ts';
+import {priceRange,configurable,productOptionsEnabled} from './product-options.ts';
 import type {PublicData} from './types.ts';
 
 export const SITE_URL=process.env.NEXT_PUBLIC_SITE_URL||'https://moc-vi-com-viet-231026.spunky-dune-5060.chatgpt.site';
@@ -23,8 +24,11 @@ export function structuredData(data:PublicData,segments:string[]=[]){
  const p=segments.length===2&&segments[0]==='san-pham'?data.products.find(p=>p.id===segments[1]&&p.active):null;
  if(p)graph.push(brand);
  const reviews=p?reviewSummary(data.reviews,p.id):null;
+ const range=p?priceRange(p):null;
+ // A variable-price configuration has no URL that preselects a purchasable variant.
+ const offerPrice=p&&(!configurable(p)||productOptionsEnabled)&&range?.min===range?.max?range?.min:undefined;
  // Google requires an Offer or real reviews; quote-only pages retain Brand/breadcrumb.
- if(p&&((p.mode==='fixed'&&p.price>0&&data.shipping.enabled)||reviews?.count)){const url=absolute('/san-pham/'+p.id);graph.push({'@type':'Product','@id':url+'#product',url,...(reviews?.count?{aggregateRating:{'@type':'AggregateRating',ratingValue:reviews.rating,reviewCount:reviews.count,bestRating:5,worstRating:1},review:reviews.items.map(r=>({'@type':'Review','@id':url+'#review-'+r.id,author:{'@type':'Person',name:r.author},datePublished:r.createdAt,reviewBody:r.body,reviewRating:{'@type':'Rating',ratingValue:r.rating,bestRating:5,worstRating:1}}))}:{}),name:p.name,description:p.description,sku:p.sku,category:p.category,...(p.image?{image:[absolute(p.image)]}:{}),brand:{'@id':brand['@id']},...(p.mode==='fixed'&&p.price>0&&data.shipping.enabled?{offers:{'@type':'Offer',url,priceCurrency:'VND',price:p.price,...(returns?{hasMerchantReturnPolicy:returns}:{}),...(shipping?{shippingDetails:{...shipping,shippingRate:{...shipping.shippingRate,value:p.price>=data.shipping.freeFrom?0:data.shipping.fee}}}:{}),availability:p.stock>0?'https://schema.org/InStock':'https://schema.org/OutOfStock',seller:{'@type':'Organization',name:b.name,'@id':SITE_URL+'/#organization'}}}:{})})}
+ if(p&&((p.mode==='fixed'&&(offerPrice??0)>0&&data.shipping.enabled)||reviews?.count)){const url=absolute('/san-pham/'+p.id);graph.push({'@type':'Product','@id':url+'#product',url,...(reviews?.count?{aggregateRating:{'@type':'AggregateRating',ratingValue:reviews.rating,reviewCount:reviews.count,bestRating:5,worstRating:1},review:reviews.items.map(r=>({'@type':'Review','@id':url+'#review-'+r.id,author:{'@type':'Person',name:r.author},datePublished:r.createdAt,reviewBody:r.body,reviewRating:{'@type':'Rating',ratingValue:r.rating,bestRating:5,worstRating:1}}))}:{}),name:p.name,description:p.description,sku:p.sku,category:p.category,...(p.image?{image:[absolute(p.image)]}:{}),brand:{'@id':brand['@id']},...(p.mode==='fixed'&&(offerPrice??0)>0&&data.shipping.enabled?{offers:{'@type':'Offer',url,priceCurrency:'VND',price:offerPrice,...(returns?{hasMerchantReturnPolicy:returns}:{}),...(shipping?{shippingDetails:{...shipping,shippingRate:{...shipping.shippingRate,value:(offerPrice??0)>=data.shipping.freeFrom?0:data.shipping.fee}}}:{}),availability:p.stock>0?'https://schema.org/InStock':'https://schema.org/OutOfStock',seller:{'@type':'Organization',name:b.name,'@id':SITE_URL+'/#organization'}}}:{})})}
  return graph.length?{'@context':'https://schema.org','@graph':graph}:null;
 }
 // Prevent CMS text from ending the script element; JSON.parse preserves the text.
