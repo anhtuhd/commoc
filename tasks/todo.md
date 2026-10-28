@@ -7,8 +7,8 @@
 - [x] Adapter frontend, JSON-LD, diagnostics.
 - [x] Kiểm thử race/rollback/replay PostgreSQL, HTTP và checkout mobile.
 - [x] Import offline, giữ thứ tự nội dung, owner và lịch sử thanh toán/thông báo.
-- [ ] Rehearsal trên VPS và kiểm chứng toàn bộ dữ liệu.
-- [ ] Commit/push, build/deploy pishare.cloud, backup/restore.
-- [ ] Kiểm tra JSON-LD production bằng Google/Schema.org và ghi báo cáo.
+- [x] Rehearsal trên VPS và kiểm chứng toàn bộ dữ liệu.
+- [x] Commit/push, build/deploy pishare.cloud, backup/restore.
+- [x] Kiểm tra JSON-LD production bằng Google/Schema.org và ghi báo cáo.
 
 Không chuyển frontend sang Go. Các mục chuyển SSR Go trong kế hoạch gốc đã được hủy theo yêu cầu mới.

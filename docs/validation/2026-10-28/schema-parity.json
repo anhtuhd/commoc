@@ -1,0 +1,88 @@
+[
+  {
+    "path": "/",
+    "types": [
+      "Brand",
+      "Organization",
+      "WebSite"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/san-pham/com-tuoi",
+    "types": [
+      "BreadcrumbList",
+      "Brand",
+      "Product"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/san-pham/banh-com",
+    "types": [
+      "BreadcrumbList",
+      "Brand",
+      "Product"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/san-pham/xoi-com",
+    "types": [
+      "BreadcrumbList",
+      "Brand",
+      "Product"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/san-pham/set-an-yen",
+    "types": [
+      "BreadcrumbList",
+      "Brand",
+      "Product"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/san-pham/cha-com",
+    "types": [
+      "BreadcrumbList",
+      "Brand",
+      "Product"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/san-pham/com-kho",
+    "types": [
+      "BreadcrumbList",
+      "Brand",
+      "Product"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/san-pham/qua-doanh-nghiep",
+    "types": [
+      "BreadcrumbList",
+      "Brand"
+    ],
+    "ok": true
+  },
+  {
+    "path": "/quan-tri",
+    "types": [],
+    "ok": true
+  },
+  {
+    "path": "/thanh-toan",
+    "types": [],
+    "ok": true
+  },
+  {
+    "path": "/tra-cuu",
+    "types": [],
+    "ok": true
+  }
+]
