@@ -232,3 +232,13 @@ p{color:#596650}.promise-strip{color:#64725a}.product-info>small{color:#65715d}.
 .editor-fields{border:0;padding:0;margin:0;min-width:0}
 .editor-fields:disabled{opacity:.7}
 .coupon .review-actions{flex-wrap:wrap;margin-top:.5rem}
+
+/* Keep navigation and the temporary trial notice visible while scrolling. */
+.header { position: sticky; top: 0; }
+#main-content { scroll-margin-top: 220px; }
+@media (max-width: 900px) {
+ .header .nav { max-height: min(70dvh, max(0px, calc(100dvh - 200px))); }
+}
+
+.trial-banner { background: #fff0c2; color: #533600; text-align: center; padding: 9px 16px; font-size: 13px; font-weight: 600; line-height: 1.4; }
+@media (max-width: 600px) { .trial-banner { font-size: 12px; padding: 8px 12px; } }
