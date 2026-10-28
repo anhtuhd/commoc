@@ -1,0 +1,3 @@
+export const metadata={robots:{index:false,follow:false}};
+export const dynamic='force-dynamic';
+export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){const {error}=await searchParams;return <main className="shell section narrow"><h1>Đăng nhập quản trị</h1><form className="panel stack" method="post" action="/api/auth/login"><label>Tài khoản<input name="username" autoComplete="username" required maxLength={100}/></label><label>Mật khẩu<input name="password" type="password" autoComplete="current-password" required maxLength={256}/></label>{error&&<p className="error">Không thể đăng nhập. Kiểm tra thông tin hoặc thử lại sau.</p>}<button className="button">Đăng nhập</button></form></main>}

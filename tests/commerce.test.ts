@@ -1,0 +1,13 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { quote, placeOrder, changeOrder } from '../lib/shop/commerce.ts';
+import { initialState } from '../lib/shop/seed.ts';
+const customer={name:'Khách thử',phone:'0901234567',address:'12 Phố Huế',region:'hanoi',note:''};
+test('server prices override client totals and quantities consolidate',()=>{const s=initialState();const q=quote(s,{items:[{id:'com-tuoi',quantity:1,price:1},{id:'com-tuoi',quantity:1}],region:'hanoi',coupon:''});assert.equal(q.subtotal,240000);assert.equal(q.items.length,1);assert.equal(q.total,270000)});
+test('quote-only products and outside delivery are rejected',()=>{const s=initialState();assert.throws(()=>quote(s,{items:[{id:'qua-doanh-nghiep',quantity:1}],region:'hanoi'}));assert.throws(()=>quote(s,{items:[{id:'com-tuoi',quantity:1}],region:'other'}))});
+test('discount expiry and minimum enforced',()=>{const s=initialState();assert.throws(()=>quote(s,{items:[{id:'com-tuoi',quantity:1}],region:'hanoi',coupon:'MOCVI10'}));s.coupons[0].endsAt='2020-01-01';assert.throws(()=>quote(s,{items:[{id:'com-tuoi',quantity:5}],region:'hanoi',coupon:'MOCVI10'}))});
+test('idempotency does not decrement stock twice and mismatched reuse fails',()=>{const s=initialState();const b={items:[{id:'com-tuoi',quantity:2}],customer,payment:'cod',key:'test-key-long-enough-1'};const a=placeOrder(s,b);const again=placeOrder(s,b);assert.equal(a.id,again.id);assert.equal(s.products[0].stock,38);assert.throws(()=>placeOrder(s,{...b,items:[{id:'com-tuoi',quantity:3}]}))});
+test('cancellation restores stock once and completed cannot cancel',()=>{const s=initialState();const o=placeOrder(s,{items:[{id:'com-tuoi',quantity:1}],customer,payment:'cod',key:'test-key-long-enough-2'});changeOrder(s,o.id,'cancelled','unpaid','');changeOrder(s,o.id,'cancelled','unpaid','');assert.equal(s.products[0].stock,40);assert.throws(()=>changeOrder(s,o.id,'confirmed','unpaid',''))});
+test('bank transfer requires merchant bank configuration',()=>{assert.throws(()=>placeOrder(initialState(),{items:[{id:'com-tuoi',quantity:1}],customer,payment:'bank',key:'test-key-long-enough-3'}))});
+
+test('configured bank payment snapshots merchant without marking paid',()=>{const s=initialState();Object.assign(s.brand,{bankName:'Ngân hàng thử',bankAccount:'123456789',bankHolder:'CUA HANG THU'});const o=placeOrder(s,{items:[{id:'com-tuoi',quantity:1}],customer,payment:'bank',key:'test-bank-snapshot-1'});s.brand.name='Thương hiệu mới';assert.equal(o.brand.name,'Mộc Vị');assert.equal(o.brand.bankAccount,'123456789');assert.equal(o.paymentStatus,'unpaid')});

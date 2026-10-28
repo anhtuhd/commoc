@@ -1,0 +1,22 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {emptyBusiness,businessSchema,policyLines} from '../lib/shop/business.ts';
+import {brandSchema,backupSchema} from '../lib/shop/validation.ts';
+import {initialState} from '../lib/shop/seed.ts';
+import {structuredData} from '../lib/shop/structured-data.ts';
+const verified={...emptyBusiness,addressConfirmed:true,street:'Địa chỉ kiểm thử',locality:'Phường kiểm thử',region:'Hà Nội',postalCode:'10000',country:'VN' as const,shippingConfirmed:true,handlingMin:'0',handlingMax:'1',transitMin:'1',transitMax:'3',returnsConfirmed:true,returnCategory:'finite' as const,returnDays:'7',returnMethod:'mail' as const,returnFees:'free' as const};
+const org=(s:ReturnType<typeof initialState>)=>structuredData(s)!['@graph'].find(n=>n['@type']==='Organization') as any;
+const offer=(s:ReturnType<typeof initialState>)=>(structuredData(s,['san-pham','com-tuoi'])!['@graph'].find(n=>n['@type']==='Product') as any).offers;
+test('legacy data and unconfirmed details do not claim real address or policies',()=>{const s=initialState();assert.ok(brandSchema.safeParse(s.brand).success);assert.ok(backupSchema.safeParse({version:1,state:s}).success);s.brand.business={...verified,addressConfirmed:false,shippingConfirmed:false,returnsConfirmed:false};assert.equal(org(s).address,undefined);assert.equal(org(s).hasMerchantReturnPolicy,undefined);assert.equal(offer(s).shippingDetails,undefined);assert.deepEqual(policyLines(s,'giao-hang'),[]);});
+test('verified published data drives address, policies and checkout rates',()=>{const s=initialState();s.brand.business=verified;assert.ok(brandSchema.safeParse(s.brand).success);assert.equal(org(s).address.streetAddress,verified.street);assert.equal(offer(s).hasMerchantReturnPolicy.merchantReturnDays,7);assert.equal(offer(s).shippingDetails.deliveryTime.handlingTime.minValue,0);assert.equal(offer(s).shippingDetails.shippingRate.value,s.shipping.fee);s.products[0].price=s.shipping.freeFrom;assert.equal(offer(s).shippingDetails.shippingRate.value,0);assert.ok(policyLines(s,'giao-hang')[0].includes('trước giảm giá'));s.shipping.enabled=false;assert.deepEqual(policyLines(s,'giao-hang'),[]);});
+test('invalid, incomplete, negative and reversed confirmed data rejected',()=>{for(const change of [{street:''},{country:'XX'},{handlingMin:''},{handlingMin:'-1'},{handlingMin:'2',handlingMax:'1'},{transitMax:'0'},{returnDays:'0'},{returnFees:''}])assert.equal(businessSchema.safeParse({...verified,...change}).success,false,JSON.stringify(change));});
+test('no returns omits irrelevant terms; drafts never affect output',()=>{const s=initialState();s.brand.business={...verified,returnCategory:'none',returnDays:'',returnFees:'',returnMethod:''};const r=offer(s).hasMerchantReturnPolicy;assert.equal(r.returnPolicyCategory,'https://schema.org/MerchantReturnNotPermitted');assert.equal(r.merchantReturnDays,undefined);assert.equal(r.returnFees,undefined);s.brand.business=undefined;s.brand.draft={business:verified};assert.equal(org(s).address,undefined);assert.equal(offer(s).shippingDetails,undefined);});
+test('refund type is explicit, validated, published and omitted for no returns',()=>{
+ const s=initialState();s.brand.business={...verified};assert.equal(offer(s).hasMerchantReturnPolicy.refundType,undefined);
+ assert.equal(businessSchema.parse(verified).refundType,'');
+ for(const refundType of ['FullRefund','ExchangeRefund','StoreCreditRefund'] as const){s.brand.business={...verified,refundType};assert.equal(org(s).hasMerchantReturnPolicy.refundType,'https://schema.org/'+refundType);assert.equal(offer(s).hasMerchantReturnPolicy.refundType,'https://schema.org/'+refundType);assert.equal(policyLines(s,'doi-tra').length,4);}
+ assert.equal(businessSchema.safeParse({...verified,refundType:'PartialRefund'}).success,false);
+ s.brand.business={...verified,refundType:'FullRefund',returnsConfirmed:false};assert.equal(offer(s).hasMerchantReturnPolicy,undefined);assert.deepEqual(policyLines(s,'doi-tra'),[]);
+ s.brand.business={...verified,refundType:'FullRefund',returnCategory:'none'};assert.equal(offer(s).hasMerchantReturnPolicy.refundType,undefined);assert.deepEqual(policyLines(s,'doi-tra'),['Không chấp nhận trả hàng.']);
+ s.brand.business={...verified};s.brand.draft={business:{...verified,refundType:'FullRefund'}};assert.equal(offer(s).hasMerchantReturnPolicy.refundType,undefined);
+});

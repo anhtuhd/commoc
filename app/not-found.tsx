@@ -1,0 +1,1 @@
+export default function NotFound(){return <main className="empty"><h1>Chưa tìm thấy trang này</h1><p>Thức quà hoặc trang bạn tìm có thể đã được thay đổi.</p><a className="button" href="/san-pham">Về gian hàng</a></main>}

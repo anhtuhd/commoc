@@ -1,0 +1,8 @@
+export function auditHtml(html:string,path:string,site:string,status=200){
+ const tags=(name:string)=>[...html.matchAll(new RegExp('<'+name+'\\b[^>]*>','gi'))].map(m=>Object.fromEntries([...m[0].matchAll(/([\w:-]+)\s*=\s*(["'])([\s\S]*?)\2/g)].map(a=>[a[1].toLowerCase(),a[3]])));
+ const meta=tags('meta'),links=tags('link');const title=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'';
+ const description=meta.find(m=>m.name==='description')?.content||'',canonical=links.find(l=>l.rel==='canonical')?.href||'',robots=meta.find(m=>m.name==='robots')?.content||'';
+ let validSchema=false,types:string[]=[];try{const scripts=[...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g)];for(const script of scripts){const value=JSON.parse(script[1]);types.push(...(value['@graph']||[value]).map((n:Record<string,string>)=>n['@type']).filter(Boolean));}validSchema=types.length>0;}catch{validSchema=false;}
+ const images=tags('img');const checks=[{label:'HTTP 200',ok:status===200},{label:'Có tiêu đề',ok:!!title},{label:'Có mô tả SEO',ok:description.length>=30},{label:'Canonical đúng trang',ok:canonical.replace(/\/$/,'')===new URL(path,site).href.replace(/\/$/,'')},{label:'Một tiêu đề H1',ok:(html.match(/<h1\b/gi)||[]).length===1},{label:'Cho phép lập chỉ mục',ok:!/noindex/i.test(robots)},{label:'Có viewport mobile',ok:meta.some(m=>m.name==='viewport')},{label:'JSON-LD đọc được',ok:validSchema},{label:'Ảnh có thuộc tính alt',ok:images.every(i=>'alt' in i)}];
+ return {path,title,description,canonical,types,checks,passed:checks.filter(c=>c.ok).length,total:checks.length};
+}

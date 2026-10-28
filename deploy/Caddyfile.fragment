@@ -1,0 +1,22 @@
+pishare.cloud {
+ tls {
+  issuer acme {
+   disable_tlsalpn_challenge
+  }
+ }
+ encode zstd gzip
+ header {
+  X-Content-Type-Options nosniff
+  Referrer-Policy strict-origin-when-cross-origin
+  X-Frame-Options SAMEORIGIN
+  Cache-Control "no-store"
+ }
+ request_body {
+  max_size 6MB
+ }
+ reverse_proxy 127.0.0.1:3301 {
+  header_up -oai-authenticated-user-id
+  header_up -oai-authenticated-user-email
+  header_up -oai-authenticated-user-full-name
+ }
+}

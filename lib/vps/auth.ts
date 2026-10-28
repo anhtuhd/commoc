@@ -1,0 +1,6 @@
+import {createHmac,scryptSync,timingSafeEqual} from 'node:crypto';
+export const COOKIE='__Host-commo_session';
+function secret(){const s=process.env.SESSION_SECRET;if(!s||s.length<32)throw Error('Session secret unavailable');return s}
+export function issueSession(user:string,now=Date.now()){const body=Buffer.from(JSON.stringify({user,expires:now+8*3600000})).toString('base64url');return body+'.'+createHmac('sha256',secret()).update(body).digest('base64url')}
+export function verifySession(token:string,now=Date.now()){try{const [body,sig,extra]=token.split('.');if(!body||!sig||extra)return null;const expected=createHmac('sha256',secret()).update(body).digest();const supplied=Buffer.from(sig,'base64url');if(supplied.length!==expected.length||!timingSafeEqual(supplied,expected))return null;const data=JSON.parse(Buffer.from(body,'base64url').toString());return data.expires>now&&data.user===process.env.ADMIN_USER?data.user:null}catch{return null}}
+export function checkPassword(user:string,password:string){try{const [salt,hash]=String(process.env.ADMIN_PASSWORD_HASH||'').split(':');if(!salt||!hash||password.length>256)return false;const expected=Buffer.from(hash,'hex');const supplied=scryptSync(password,salt,64);return expected.length===64&&timingSafeEqual(supplied,expected)&&user===process.env.ADMIN_USER}catch{return false}}

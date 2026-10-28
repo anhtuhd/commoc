@@ -1,0 +1,5 @@
+[Unit]
+Description=Moc Vi expire bank reservations and deliver notifications
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flock -n /run/commo-maintenance.lock /usr/bin/docker exec commo-web-1 node /app/scripts/maintenance.ts

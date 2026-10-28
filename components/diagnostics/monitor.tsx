@@ -1,0 +1,14 @@
+'use client';
+import {useEffect,useRef,useState} from 'react';
+import {publicPath} from '../../lib/diagnostics/paths';
+function send(name:string,value:number,path:string,id=crypto.randomUUID()){
+ if(navigator.doNotTrack==='1'||!Number.isFinite(value)||value<0||value>120000||!publicPath(path))return;
+ const body=JSON.stringify({id,name,value,path:publicPath(path),device:matchMedia('(max-width: 767px)').matches?'mobile':'desktop'});
+ if(!navigator.sendBeacon?.('/api/diagnostics',new Blob([body],{type:'application/json'})))void fetch('/api/diagnostics',{method:'POST',headers:{'Content-Type':'application/json'},body,keepalive:true}).catch(()=>{});
+}
+export function PerformanceMonitor(){
+ const [pending,setPending]=useState(false),navigation=useRef<{path:string;start:number}|null>(null),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
+ useEffect(()=>{const path=publicPath(location.pathname);if(!path||navigator.doNotTrack==='1')return;let active=true;void import('web-vitals').then(({onLCP,onINP,onCLS,onFCP,onTTFB})=>{const report=(m:{name:string;value:number;id:string})=>{if(active)send(m.name,m.value,path,m.id)};[onLCP,onINP,onCLS,onFCP,onTTFB].forEach(register=>register(report));});return()=>{active=false};},[]);
+ useEffect(()=>{function click(e:MouseEvent){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;const anchor=(e.target instanceof Element?e.target.closest('a[href]'):null) as HTMLAnchorElement|null;if(!anchor||anchor.target&&anchor.target!=='_self'||anchor.hasAttribute('download'))return;const url=new URL(anchor.href,location.href);if(url.origin!==location.origin||url.pathname===location.pathname)return;navigation.current={path:url.pathname,start:performance.now()};setPending(true);clearTimeout(timer.current);timer.current=setTimeout(()=>{navigation.current=null;setPending(false)},12000);}document.addEventListener('click',click,true);function ready(e:Event){const path=(e as CustomEvent).detail?.path;const n=navigation.current;if(!n||n.path!==path)return;navigation.current=null;requestAnimationFrame(()=>requestAnimationFrame(()=>send('NAV',performance.now()-n.start,n.path)));setPending(false);clearTimeout(timer.current);}window.addEventListener('commo:page-ready',ready);function api(e:Event){const d=(e as CustomEvent).detail;if(d&&typeof d.duration==='number'){const path=publicPath(location.pathname);if(path&&navigator.doNotTrack!=='1')send('API',d.duration,path);}}window.addEventListener('commo:api-timing',api);return()=>{document.removeEventListener('click',click,true);window.removeEventListener('commo:page-ready',ready);window.removeEventListener('commo:api-timing',api);clearTimeout(timer.current)}},[]);
+ return pending?<div className="navigation-progress" role="status" aria-label="Đang chuyển trang"><span/><span className="sr-only">Đang chuyển trang…</span></div>:null;
+}

@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="shell section page-loading" role="status" aria-label="Đang tải trang"><div className="loading-title"/><div className="loading-line"/><div className="loading-grid">{[0,1,2,3].map(n=><div className="loading-card" key={n}/>)}</div><p>Đang chuẩn bị nội dung…</p></main>}

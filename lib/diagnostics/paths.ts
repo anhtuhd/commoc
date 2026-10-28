@@ -1,0 +1,2 @@
+const fixed=new Set(['/','/san-pham','/bo-suu-tap','/cau-chuyen','/bai-viet','/lien-he','/gio-hang','/thanh-toan','/tra-cuu','/dat-hang-thanh-cong','/chinh-sach/giao-hang','/chinh-sach/doi-tra','/chinh-sach/bao-mat']);
+export function publicPath(value:string){const path=value.split(/[?#]/)[0];if(path==='/san-pham/:id'||path==='/bai-viet/:id')return path;if(fixed.has(path))return path;const match=path.match(/^\/(san-pham|bai-viet)\/[a-z0-9-]{1,80}$/);return match?'/'+match[1]+'/:id':null;}

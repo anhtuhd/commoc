@@ -1,0 +1,6 @@
+[Unit]
+Description=Moc Vi verified database and media backup
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/commo/source/deploy/backup.py
