@@ -1,0 +1,6 @@
+[Unit]
+Description=ComMoc PostgreSQL and media backup
+After=docker.service
+[Service]
+Type=oneshot
+ExecStart=/opt/commoc/source/deploy/backup-postgres.sh

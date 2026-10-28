@@ -1,0 +1,7 @@
+# backend/server must be built from the release source for linux/amd64 by the verified Go toolchain.
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/* && useradd -u 1000 -m app
+COPY backend/server /usr/local/bin/server
+USER app
+EXPOSE 8080
+CMD ["server"]

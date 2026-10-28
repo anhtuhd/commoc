@@ -15,3 +15,4 @@ docs/validation
 backups
 *.sqlite*
 *.db*
+backend/qa-seed.json

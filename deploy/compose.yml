@@ -1,25 +1,62 @@
+name: commoc
 services:
-  web:
-    image: commo:vps-initial
+  db:
+    image: postgres:18-bookworm
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:3301:3000"
-    env_file:
-      - /opt/commo/secrets/commo.env
+    env_file: /opt/commoc/secrets/database.env
     volumes:
-      - /opt/commo/data:/data
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    mem_limit: 512m
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - /opt/commoc/postgres:/var/lib/postgresql
+    mem_limit: 256m
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/store/public').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test: [CMD-SHELL, 'pg_isready -U commoc -d commoc']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: &logging
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+  api:
+    image: commoc-api:${RELEASE}
+    restart: unless-stopped
+    env_file: /opt/commoc/secrets/api.env
+    environment:
+      SITE_URL: https://pishare.cloud
+      ZALO_BRIDGE_URL: http://zalo:8081
+      MEDIA_DIR: /data/media
+    volumes:
+      - /opt/commoc/media:/data/media
+    ports: ['127.0.0.1:3402:8080']
+    depends_on:
+      db: {condition: service_healthy}
+    mem_limit: 192m
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+    logging: *logging
+  web:
+    image: commoc-web:${RELEASE}
+    restart: unless-stopped
+    environment:
+      GO_API_URL: http://api:8080
+      COMMO_RUNTIME: vps
+      COMMO_SITE_ORIGIN: https://pishare.cloud
+      NEXT_PUBLIC_SITE_URL: https://pishare.cloud
+    ports: ['127.0.0.1:3401:3000']
+    depends_on: [api]
+    mem_limit: 384m
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/api/store/public').then(r=>{if(!r.ok)process.exit(1)})"]
       interval: 30s
       timeout: 10s
       retries: 3
+    logging: *logging
+  zalo:
+    image: commoc-zalo:${RELEASE}
+    restart: unless-stopped
+    env_file: /opt/commoc/secrets/bridge.env
+    volumes: ['/opt/commoc/zalo:/data']
+    mem_limit: 128m
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+    logging: *logging
